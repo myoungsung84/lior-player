@@ -30,3 +30,9 @@ Lior/vendor/mpv/*.zip
 Lior/vendor/mpv/*.tmp
 Lior/vendor/mpv/download/
 Lior/vendor/mpv/extracted/
+
+# native binaries
+Lior/vendor/mpv/*.dll
+
+# native binaries
+Lior/vendor/mpv/*.dll

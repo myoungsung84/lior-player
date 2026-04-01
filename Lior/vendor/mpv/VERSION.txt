@@ -1,0 +1,19 @@
+libmpv vendor record for Lior
+
+Source:
+- https://sourceforge.net/projects/mpv-player-windows/files/libmpv/
+- Maintainer: shinchiro
+
+Selected package:
+- mpv-dev-x86_64-20260301-git-05fac7f.7z
+
+Vendored file:
+- vendor/mpv/mpv-2.dll
+
+Selected build date:
+- 2026-03-01
+
+Project note:
+- Lior vendors libmpv as a fixed Windows binary.
+- Upgrades are manual only. Do not add runtime auto-download.
+- When upgrading, replace mpv-2.dll, then update this file with the new source and build details.
