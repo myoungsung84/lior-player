@@ -1,0 +1,32 @@
+# Build outputs
+bin/
+obj/
+TestResults/
+
+# IDE and user-specific files
+.vs/
+.idea/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+*.DotSettings.user
+
+# ReSharper / Rider
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.sln.iml
+
+# Local tool and cache folders
+.dotnet/
+.tmp/
+tmp/
+temp/
+
+# Native/media download leftovers
+Lior/vendor/mpv/*.7z
+Lior/vendor/mpv/*.zip
+Lior/vendor/mpv/*.tmp
+Lior/vendor/mpv/download/
+Lior/vendor/mpv/extracted/
