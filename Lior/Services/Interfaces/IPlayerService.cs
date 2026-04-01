@@ -10,6 +10,8 @@ public interface IPlayerService
 
     double Volume { get; }
 
+    bool IsMuted { get; }
+
     void SetRenderTarget(nint windowHandle);
 
     void Shutdown();
@@ -29,4 +31,6 @@ public interface IPlayerService
     bool Seek(double positionSeconds);
 
     bool SetVolume(double volume);
+
+    bool SetMuted(bool isMuted);
 }

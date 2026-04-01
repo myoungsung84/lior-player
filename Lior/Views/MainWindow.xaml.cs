@@ -12,11 +12,18 @@ namespace Lior.Views;
 public partial class MainWindow : Window
 {
     private readonly IPlayerService _playerService;
+    private readonly DispatcherTimer _surfaceClickTimer;
     private bool _renderTargetAssigned;
+    private MainWindowViewModel? _pendingSurfaceClickViewModel;
 
     public MainWindow(MainWindowViewModel viewModel, IPlayerService playerService)
     {
         _playerService = playerService;
+        _surfaceClickTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(250)
+        };
+        _surfaceClickTimer.Tick += OnSurfaceClickTimerTick;
         InitializeComponent();
         DataContext = viewModel;
 
@@ -24,6 +31,7 @@ public partial class MainWindow : Window
         Loaded += OnLoaded;
         ContentRendered += OnContentRendered;
         Closed += OnClosed;
+        PreviewKeyDown += OnPreviewKeyDown;
 
         SeekSlider.PreviewMouseLeftButtonDown += OnSeekSliderPreviewMouseLeftButtonDown;
         SeekSlider.ValueChanged += OnSeekSliderValueChanged;
@@ -51,6 +59,79 @@ public partial class MainWindow : Window
     private void OnClosed(object? sender, EventArgs e)
     {
         _playerService.Shutdown();
+    }
+
+    private void OnVideoSurfaceMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel viewModel)
+        {
+            return;
+        }
+
+        if (e.ClickCount == 2)
+        {
+            _surfaceClickTimer.Stop();
+            _pendingSurfaceClickViewModel = null;
+
+            if (viewModel.OpenFileCommand.CanExecute(null))
+            {
+                viewModel.OpenFileCommand.Execute(null);
+            }
+
+            e.Handled = true;
+            return;
+        }
+
+        _pendingSurfaceClickViewModel = viewModel;
+        _surfaceClickTimer.Stop();
+        _surfaceClickTimer.Start();
+        e.Handled = true;
+    }
+
+    private void OnSurfaceClickTimerTick(object? sender, EventArgs e)
+    {
+        _surfaceClickTimer.Stop();
+
+        var viewModel = _pendingSurfaceClickViewModel;
+        _pendingSurfaceClickViewModel = null;
+
+        viewModel?.TogglePlayPause();
+    }
+
+    private void OnPreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel viewModel)
+        {
+            return;
+        }
+
+        switch (e.Key)
+        {
+            case Key.Space:
+                viewModel.TogglePlayPause();
+                e.Handled = true;
+                break;
+            case Key.Left:
+                viewModel.SeekRelative(-5);
+                e.Handled = true;
+                break;
+            case Key.Right:
+                viewModel.SeekRelative(5);
+                e.Handled = true;
+                break;
+            case Key.Up:
+                viewModel.AdjustVolume(5);
+                e.Handled = true;
+                break;
+            case Key.Down:
+                viewModel.AdjustVolume(-5);
+                e.Handled = true;
+                break;
+            case Key.M:
+                viewModel.ToggleMuteCommand.Execute(null);
+                e.Handled = true;
+                break;
+        }
     }
 
     private void OnSeekSliderPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

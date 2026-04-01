@@ -17,6 +17,7 @@ public partial class MainWindowViewModel : ObservableObject
     private bool _isSeekInteractionActive;
     private DateTime _seekSyncSuppressedUntilUtc = DateTime.MinValue;
     private double? _pendingSeekPositionSeconds;
+    private double _previousVolumeBeforeMute = 70;
 
     [ObservableProperty]
     private string currentMediaPath = "No media selected";
@@ -45,6 +46,9 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private bool isSeekAvailable;
 
+    [ObservableProperty]
+    private bool isMuted;
+
     public bool HasSelectedMedia => !string.IsNullOrWhiteSpace(_playerService.CurrentMediaPath);
 
     public bool CanPlay => HasSelectedMedia && PlaybackState is not PlaybackState.Playing;
@@ -54,6 +58,8 @@ public partial class MainWindowViewModel : ObservableObject
     public bool CanStop => HasSelectedMedia && PlaybackState is not PlaybackState.None and not PlaybackState.Stopped;
 
     public bool IsPaused => PlaybackState is PlaybackState.Paused;
+
+    public string MuteButtonText => IsMuted ? "🔇" : "🔊";
 
     public string MediaTitle =>
         string.IsNullOrWhiteSpace(_playerService.CurrentMediaPath)
@@ -75,6 +81,7 @@ public partial class MainWindowViewModel : ObservableObject
         _playbackTimer.Tick += OnPlaybackTimerTick;
 
         VolumeLevel = _playerService.Volume;
+        _previousVolumeBeforeMute = VolumeLevel > 0 ? VolumeLevel : 70;
 
         SyncFromPlayer("Ready");
         _playbackTimer.Start();
@@ -153,6 +160,50 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
+    private void ToggleMute()
+    {
+        try
+        {
+            if (IsMuted)
+            {
+                var restoreVolume = _previousVolumeBeforeMute > 0 ? _previousVolumeBeforeMute : Math.Max(VolumeLevel, 50);
+                _isUpdatingFromPlayer = true;
+                VolumeLevel = Math.Clamp(restoreVolume, 0, 100);
+                _isUpdatingFromPlayer = false;
+
+                if (!_playerService.SetVolume(VolumeLevel) || !_playerService.SetMuted(false))
+                {
+                    StatusText = "Unmute failed";
+                    return;
+                }
+
+                IsMuted = false;
+                StatusText = "Audio unmuted";
+                return;
+            }
+
+            if (VolumeLevel > 0)
+            {
+                _previousVolumeBeforeMute = VolumeLevel;
+            }
+
+            if (!_playerService.SetMuted(true))
+            {
+                StatusText = "Mute failed";
+                return;
+            }
+
+            IsMuted = true;
+            StatusText = "Audio muted";
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "An error occurred while toggling mute.");
+            StatusText = "Mute toggle failed";
+        }
+    }
+
     partial void OnCurrentMediaPathChanged(string value)
     {
         OnPropertyChanged(nameof(HasSelectedMedia));
@@ -169,6 +220,11 @@ public partial class MainWindowViewModel : ObservableObject
         RefreshCommandStates();
     }
 
+    partial void OnIsMutedChanged(bool value)
+    {
+        OnPropertyChanged(nameof(MuteButtonText));
+    }
+
     partial void OnVolumeLevelChanged(double value)
     {
         if (_isUpdatingFromPlayer)
@@ -178,6 +234,21 @@ public partial class MainWindowViewModel : ObservableObject
 
         try
         {
+            if (value > 0)
+            {
+                _previousVolumeBeforeMute = value;
+            }
+
+            if (IsMuted)
+            {
+                if (!_playerService.SetMuted(false))
+                {
+                    _logger.LogWarning("Mute state could not be cleared before volume change.");
+                }
+
+                IsMuted = false;
+            }
+
             if (!_playerService.SetVolume(value))
             {
                 _logger.LogWarning("Volume change was not applied.");
@@ -201,6 +272,7 @@ public partial class MainWindowViewModel : ObservableObject
         OnPropertyChanged(nameof(CanPause));
         OnPropertyChanged(nameof(CanStop));
         OnPropertyChanged(nameof(IsPaused));
+        OnPropertyChanged(nameof(MuteButtonText));
         RefreshCommandStates();
     }
 
@@ -303,6 +375,7 @@ public partial class MainWindowViewModel : ObservableObject
 
             _isUpdatingFromPlayer = true;
             VolumeLevel = _playerService.Volume;
+            IsMuted = _playerService.IsMuted;
         }
         catch (Exception exception)
         {
@@ -337,5 +410,33 @@ public partial class MainWindowViewModel : ObservableObject
         return time.TotalHours >= 1
             ? $"{(int)time.TotalHours}:{time:mm\\:ss}"
             : $"{(int)time.TotalMinutes}:{time:ss}";
+    }
+
+    public void TogglePlayPause()
+    {
+        if (PlaybackState is PlaybackState.Playing)
+        {
+            Pause();
+            return;
+        }
+
+        Play();
+    }
+
+    public void SeekRelative(double offsetSeconds)
+    {
+        if (!HasSelectedMedia || !IsSeekAvailable)
+        {
+            return;
+        }
+
+        BeginSeekInteraction();
+        CommitSeekInteraction(ClampSeekPosition(ElapsedSeconds + offsetSeconds));
+    }
+
+    public void AdjustVolume(double delta)
+    {
+        var nextVolume = Math.Clamp(VolumeLevel + delta, 0, 100);
+        VolumeLevel = nextVolume;
     }
 }

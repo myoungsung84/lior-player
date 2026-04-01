@@ -19,6 +19,7 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
     private bool _disposed;
     private bool _initialized;
     private double _volume;
+    private bool _isMuted;
 
     public MpvPlayerService(
         ILogger<MpvPlayerService> logger,
@@ -49,6 +50,8 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
     public string? CurrentMediaPath { get; private set; }
 
     public double Volume => _volume;
+
+    public bool IsMuted => _isMuted;
 
     public void SetRenderTarget(nint windowHandle)
     {
@@ -279,6 +282,27 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
         return true;
     }
 
+    public bool SetMuted(bool isMuted)
+    {
+        ThrowIfDisposed();
+
+        _isMuted = isMuted;
+
+        if (!EnsureInitialized())
+        {
+            return true;
+        }
+
+        var result = SetFlagProperty("mute", isMuted);
+        if (result < 0)
+        {
+            _logger.LogWarning("mpv mute request failed with code {Result}", result);
+            return false;
+        }
+
+        return true;
+    }
+
     public void Shutdown()
     {
         if (_disposed)
@@ -344,6 +368,12 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
         if (volumeResult < 0)
         {
             _logger.LogWarning("Failed to apply mpv volume after initialization. Error code: {ErrorCode}", volumeResult);
+        }
+
+        var muteResult = SetFlagProperty("mute", _isMuted);
+        if (muteResult < 0)
+        {
+            _logger.LogWarning("Failed to apply mpv mute after initialization. Error code: {ErrorCode}", muteResult);
         }
 
         _initialized = true;
@@ -464,6 +494,32 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
             valuePtr = Marshal.AllocHGlobal(sizeof(double));
             Marshal.StructureToPtr(value, valuePtr, false);
             return MpvNative.mpv_set_property(_handle, namePtr, MpvFormatDouble, valuePtr);
+        }
+        finally
+        {
+            if (namePtr != nint.Zero)
+            {
+                Marshal.FreeCoTaskMem(namePtr);
+            }
+
+            if (valuePtr != nint.Zero)
+            {
+                Marshal.FreeHGlobal(valuePtr);
+            }
+        }
+    }
+
+    private int SetFlagProperty(string name, bool value)
+    {
+        var namePtr = nint.Zero;
+        var valuePtr = nint.Zero;
+
+        try
+        {
+            namePtr = Marshal.StringToCoTaskMemUTF8(name);
+            valuePtr = Marshal.AllocHGlobal(sizeof(int));
+            Marshal.WriteInt32(valuePtr, value ? 1 : 0);
+            return MpvNative.mpv_set_property(_handle, namePtr, 3, valuePtr);
         }
         finally
         {

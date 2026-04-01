@@ -65,11 +65,15 @@
         <Style x:Key="PlayerSlider" TargetType="Slider">
             <Setter Property="IsMoveToPointEnabled" Value="False" />
             <Setter Property="Focusable" Value="False" />
+            <Setter Property="Background" Value="Transparent" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Slider">
-                        <Grid x:Name="Root" Height="20" VerticalAlignment="Center">
-                            <Track x:Name="PART_Track" VerticalAlignment="Center">
+                        <Border x:Name="HitArea"
+                                Background="{TemplateBinding Background}"
+                                Padding="0,8">
+                            <Grid x:Name="Root" Height="20" VerticalAlignment="Center">
+                                <Track x:Name="PART_Track" VerticalAlignment="Center">
                                 <Track.DecreaseRepeatButton>
                                     <RepeatButton Focusable="False">
                                         <RepeatButton.Template>
@@ -90,32 +94,33 @@
                                         </RepeatButton.Template>
                                     </RepeatButton>
                                 </Track.IncreaseRepeatButton>
-                                <Track.Thumb>
-                                    <Thumb Focusable="False">
-                                        <Thumb.Template>
-                                            <ControlTemplate TargetType="Thumb">
-                                                <Ellipse x:Name="ThumbDot"
-                                                         Width="11" Height="11"
-                                                         Fill="#C0C0C0" />
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="ThumbDot" Property="Fill" Value="#FFFFFF" />
-                                                        <Setter TargetName="ThumbDot" Property="Width" Value="13" />
-                                                        <Setter TargetName="ThumbDot" Property="Height" Value="13" />
-                                                    </Trigger>
-                                                    <Trigger Property="IsDragging" Value="True">
-                                                        <Setter TargetName="ThumbDot" Property="Fill" Value="#FFFFFF" />
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Thumb.Template>
-                                    </Thumb>
-                                </Track.Thumb>
-                            </Track>
-                        </Grid>
+                                    <Track.Thumb>
+                                        <Thumb Focusable="False">
+                                            <Thumb.Template>
+                                                <ControlTemplate TargetType="Thumb">
+                                                    <Ellipse x:Name="ThumbDot"
+                                                             Width="11" Height="11"
+                                                             Fill="#C0C0C0" />
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="ThumbDot" Property="Fill" Value="#FFFFFF" />
+                                                            <Setter TargetName="ThumbDot" Property="Width" Value="13" />
+                                                            <Setter TargetName="ThumbDot" Property="Height" Value="13" />
+                                                        </Trigger>
+                                                        <Trigger Property="IsDragging" Value="True">
+                                                            <Setter TargetName="ThumbDot" Property="Fill" Value="#FFFFFF" />
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Thumb.Template>
+                                        </Thumb>
+                                    </Track.Thumb>
+                                </Track>
+                            </Grid>
+                        </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="Root" Property="Opacity" Value="0.25" />
+                                <Setter TargetName="HitArea" Property="Opacity" Value="0.25" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -136,6 +141,9 @@
 
             <!-- mpv render surface -->
             <local:MpvHost x:Name="VideoHost" />
+
+            <Border Background="Transparent"
+                    MouseLeftButtonDown="OnVideoSurfaceMouseLeftButtonDown" />
 
             <!-- No-media placeholder (collapses once a file is loaded) -->
             <StackPanel HorizontalAlignment="Center"
@@ -239,6 +247,7 @@
                         Maximum="{Binding DurationSeconds}"
                         Value="{Binding ElapsedSeconds, Mode=OneWay}"
                         IsEnabled="{Binding IsSeekAvailable}"
+                        Height="24"
                         Style="{StaticResource PlayerSlider}"
                         ToolTipService.ShowOnDisabled="True"
                         ToolTip="재생 위치 이동" />
@@ -337,9 +346,11 @@
 
                         <!-- Volume icon -->
                         <Button Margin="0,0,2,0"
+                                Command="{Binding ToggleMuteCommand}"
                                 Style="{StaticResource PlayerIconButton}"
-                                ToolTip="볼륨">
-                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE767;" />
+                                ToolTip="음소거">
+                            <TextBlock FontSize="14"
+                                       Text="{Binding MuteButtonText}" />
                         </Button>
 
                         <!-- Volume slider -->
@@ -348,6 +359,7 @@
                                 Minimum="0" Maximum="100"
                                 Value="{Binding VolumeLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 Margin="0,0,8,0"
+                                Height="24"
                                 VerticalAlignment="Center"
                                 Style="{StaticResource PlayerSlider}"
                                 ToolTip="볼륨 조절" />
