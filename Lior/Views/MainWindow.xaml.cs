@@ -194,6 +194,40 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
+    private void OnTitleDragSurfaceMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount == 2)
+        {
+            ToggleMaximizeRestore();
+            e.Handled = true;
+            return;
+        }
+
+        if (e.ButtonState != MouseButtonState.Pressed)
+        {
+            return;
+        }
+
+        Activate();
+        DragMove();
+        e.Handled = true;
+    }
+
+    private void OnMinimizeButtonClick(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState.Minimized;
+    }
+
+    private void OnMaximizeRestoreButtonClick(object sender, RoutedEventArgs e)
+    {
+        ToggleMaximizeRestore();
+    }
+
+    private void OnCloseButtonClick(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
     private static bool IsThumbInteraction(DependencyObject? source)
     {
         while (source is not null)
@@ -267,5 +301,12 @@ public partial class MainWindow : Window
         Dispatcher.BeginInvoke(
             AttachRenderTarget,
             DispatcherPriority.Loaded);
+    }
+
+    private void ToggleMaximizeRestore()
+    {
+        WindowState = WindowState == WindowState.Maximized
+            ? WindowState.Normal
+            : WindowState.Maximized;
     }
 }
