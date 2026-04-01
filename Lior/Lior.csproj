@@ -20,7 +20,7 @@
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="vendor\mpv\mpv-2.dll">
+    <Content Include="vendor\mpv\mpv-2.dll" Condition="Exists('vendor\mpv\mpv-2.dll')">
       <Link>mpv-2.dll</Link>
       <TargetPath>mpv-2.dll</TargetPath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

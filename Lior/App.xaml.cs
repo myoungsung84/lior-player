@@ -1,4 +1,5 @@
 using System.Windows;
+using System.IO;
 using Lior.Infrastructure.Hosting;
 using Lior.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,8 +24,31 @@ public partial class App : Application
 
         await _host.StartAsync();
 
-        var mainWindow = _host.Services.GetRequiredService<MainWindow>();
-        mainWindow.Show();
+        try
+        {
+            var mainWindow = _host.Services.GetRequiredService<MainWindow>();
+            mainWindow.Show();
+        }
+        catch (FileNotFoundException exception)
+        {
+            MessageBox.Show(
+                $"{exception.Message}{Environment.NewLine}{Environment.NewLine}Path: {exception.FileName}",
+                "Lior startup error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+
+            Shutdown(-1);
+        }
+        catch (DllNotFoundException exception)
+        {
+            MessageBox.Show(
+                $"{exception.Message}{Environment.NewLine}{Environment.NewLine}Make sure mpv-2.dll is available before running the app.",
+                "Lior startup error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+
+            Shutdown(-1);
+        }
     }
 
     protected override async void OnExit(ExitEventArgs e)

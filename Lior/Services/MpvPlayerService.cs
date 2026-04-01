@@ -19,6 +19,7 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
     public MpvPlayerService(ILogger<MpvPlayerService> logger)
     {
         _logger = logger;
+        EnsureNativeLibraryExists();
         _handle = MpvNative.mpv_create();
 
         if (_handle == nint.Zero)
@@ -322,6 +323,17 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
         if (clearMediaPath)
         {
             CurrentMediaPath = null;
+        }
+    }
+
+    private static void EnsureNativeLibraryExists()
+    {
+        var nativeLibraryPath = Path.Combine(AppContext.BaseDirectory, "mpv-2.dll");
+        if (!File.Exists(nativeLibraryPath))
+        {
+            throw new FileNotFoundException(
+                "mpv-2.dll was not found. Place the file at 'Lior/vendor/mpv/mpv-2.dll' before running the app.",
+                nativeLibraryPath);
         }
     }
 
