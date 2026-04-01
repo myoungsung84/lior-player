@@ -5,20 +5,27 @@ using Lior.Models;
 using Lior.Services.Interfaces;
 using Lior.Services.Native;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Lior.Options;
 
 namespace Lior.Services;
 
 public sealed class MpvPlayerService : IPlayerService, IDisposable
 {
+    private const int MpvFormatDouble = 5;
     private readonly ILogger<MpvPlayerService> _logger;
     private nint _handle;
     private nint _renderTarget;
     private bool _disposed;
     private bool _initialized;
+    private double _volume;
 
-    public MpvPlayerService(ILogger<MpvPlayerService> logger)
+    public MpvPlayerService(
+        ILogger<MpvPlayerService> logger,
+        IOptions<PlayerOptions> playerOptions)
     {
         _logger = logger;
+        _volume = Math.Clamp(playerOptions.Value.DefaultVolume, 0, 100);
         EnsureNativeLibraryExists();
         _handle = MpvNative.mpv_create();
 
@@ -34,11 +41,14 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
         SetOptionString("osc", "no");
         SetOptionString("keep-open", "yes");
         SetOptionString("idle", "yes");
+        SetOptionString("volume", _volume.ToString(CultureInfo.InvariantCulture));
     }
 
     public PlaybackState State { get; private set; } = PlaybackState.None;
 
     public string? CurrentMediaPath { get; private set; }
+
+    public double Volume => _volume;
 
     public void SetRenderTarget(nint windowHandle)
     {
@@ -191,6 +201,84 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
         return true;
     }
 
+    public double GetPositionSeconds()
+    {
+        ThrowIfDisposed();
+
+        if (!EnsureInitialized())
+        {
+            return 0;
+        }
+
+        return Math.Max(0, GetDoubleProperty("time-pos"));
+    }
+
+    public double GetDurationSeconds()
+    {
+        ThrowIfDisposed();
+
+        if (!EnsureInitialized())
+        {
+            return 0;
+        }
+
+        return Math.Max(0, GetDoubleProperty("duration"));
+    }
+
+    public bool Seek(double positionSeconds)
+    {
+        ThrowIfDisposed();
+
+        if (!EnsureInitialized() || string.IsNullOrWhiteSpace(CurrentMediaPath))
+        {
+            return false;
+        }
+
+        var duration = GetDurationSeconds();
+        if (duration <= 0)
+        {
+            return false;
+        }
+
+        var clampedPosition = Math.Clamp(positionSeconds, 0, duration);
+        var result = SetDoubleProperty("time-pos", clampedPosition);
+
+        if (result < 0)
+        {
+            _logger.LogWarning("mpv seek request failed with code {Result}", result);
+            return false;
+        }
+
+        if (State is PlaybackState.Stopped)
+        {
+            State = PlaybackState.Loaded;
+        }
+
+        return true;
+    }
+
+    public bool SetVolume(double volume)
+    {
+        ThrowIfDisposed();
+
+        var clampedVolume = Math.Clamp(volume, 0, 100);
+        _volume = clampedVolume;
+
+        if (!EnsureInitialized())
+        {
+            return true;
+        }
+
+        var result = SetDoubleProperty("volume", clampedVolume);
+        if (result < 0)
+        {
+            _logger.LogWarning("mpv volume request failed with code {Result}", result);
+            return false;
+        }
+
+        return true;
+    }
+
     public void Shutdown()
     {
         if (_disposed)
@@ -250,6 +338,12 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
         {
             _logger.LogError("Failed to initialize mpv. Error code: {ErrorCode}", initializeResult);
             return false;
+        }
+
+        var volumeResult = SetDoubleProperty("volume", _volume);
+        if (volumeResult < 0)
+        {
+            _logger.LogWarning("Failed to apply mpv volume after initialization. Error code: {ErrorCode}", volumeResult);
         }
 
         _initialized = true;
@@ -323,6 +417,65 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
         if (clearMediaPath)
         {
             CurrentMediaPath = null;
+        }
+    }
+
+    private double GetDoubleProperty(string name)
+    {
+        var namePtr = nint.Zero;
+        var valuePtr = nint.Zero;
+
+        try
+        {
+            namePtr = Marshal.StringToCoTaskMemUTF8(name);
+            valuePtr = Marshal.AllocHGlobal(sizeof(double));
+            Marshal.StructureToPtr(0d, valuePtr, false);
+
+            var result = MpvNative.mpv_get_property(_handle, namePtr, MpvFormatDouble, valuePtr);
+            if (result < 0)
+            {
+                return 0;
+            }
+
+            return Marshal.PtrToStructure<double>(valuePtr);
+        }
+        finally
+        {
+            if (namePtr != nint.Zero)
+            {
+                Marshal.FreeCoTaskMem(namePtr);
+            }
+
+            if (valuePtr != nint.Zero)
+            {
+                Marshal.FreeHGlobal(valuePtr);
+            }
+        }
+    }
+
+    private int SetDoubleProperty(string name, double value)
+    {
+        var namePtr = nint.Zero;
+        var valuePtr = nint.Zero;
+
+        try
+        {
+            namePtr = Marshal.StringToCoTaskMemUTF8(name);
+            valuePtr = Marshal.AllocHGlobal(sizeof(double));
+            Marshal.StructureToPtr(value, valuePtr, false);
+            return MpvNative.mpv_set_property(_handle, namePtr, MpvFormatDouble, valuePtr);
+        }
+        finally
+        {
+            if (namePtr != nint.Zero)
+            {
+                Marshal.FreeCoTaskMem(namePtr);
+            }
+
+            if (valuePtr != nint.Zero)
+            {
+                Marshal.FreeHGlobal(valuePtr);
+            }
         }
     }
 

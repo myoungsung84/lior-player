@@ -7,147 +7,376 @@
         mc:Ignorable="d"
         Title="Lior"
         Width="1080"
-        Height="720"
-        MinWidth="860"
-        MinHeight="560"
-        Background="#111318">
-    <Grid Margin="16" Background="#111318">
+        Height="660"
+        MinWidth="640"
+        MinHeight="420"
+        Background="#0E0E0E"
+        FontFamily="Segoe UI">
+
+    <Window.Resources>
+
+        <!-- ─── Player icon button ───────────────────────── -->
+        <Style x:Key="PlayerIconButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="#7A7A7A" />
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="5"
+                                Width="{TemplateBinding Width}"
+                                Height="{TemplateBinding Height}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#232323" />
+                                <Setter Property="Foreground" Value="#E0E0E0" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#2D2D2D" />
+                                <Setter Property="Foreground" Value="#FFFFFF" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="#303030" />
+                                <Setter Property="Cursor" Value="Arrow" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ─── Icon glyph TextBlock (inherits Foreground from parent Button) ── -->
+        <Style x:Key="IconGlyph" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="15" />
+        </Style>
+
+        <!-- ─── Seek / volume slider ─────────────────────── -->
+        <Style x:Key="PlayerSlider" TargetType="Slider">
+            <Setter Property="IsMoveToPointEnabled" Value="False" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid x:Name="Root" Height="20" VerticalAlignment="Center">
+                            <Track x:Name="PART_Track" VerticalAlignment="Center">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Focusable="False">
+                                        <RepeatButton.Template>
+                                            <ControlTemplate TargetType="RepeatButton">
+                                                <Border Height="3" Background="#686868"
+                                                        CornerRadius="1.5,0,0,1.5" />
+                                            </ControlTemplate>
+                                        </RepeatButton.Template>
+                                    </RepeatButton>
+                                </Track.DecreaseRepeatButton>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Focusable="False">
+                                        <RepeatButton.Template>
+                                            <ControlTemplate TargetType="RepeatButton">
+                                                <Border Height="3" Background="#2C2C2C"
+                                                        CornerRadius="0,1.5,1.5,0" />
+                                            </ControlTemplate>
+                                        </RepeatButton.Template>
+                                    </RepeatButton>
+                                </Track.IncreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Focusable="False">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse x:Name="ThumbDot"
+                                                         Width="11" Height="11"
+                                                         Fill="#C0C0C0" />
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="ThumbDot" Property="Fill" Value="#FFFFFF" />
+                                                        <Setter TargetName="ThumbDot" Property="Width" Value="13" />
+                                                        <Setter TargetName="ThumbDot" Property="Height" Value="13" />
+                                                    </Trigger>
+                                                    <Trigger Property="IsDragging" Value="True">
+                                                        <Setter TargetName="ThumbDot" Property="Fill" Value="#FFFFFF" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Root" Property="Opacity" Value="0.25" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0"
-                Margin="0,0,0,16"
-                Padding="24"
-                Background="#1B1F27"
-                BorderBrush="#2B3340"
-                BorderThickness="1"
-                CornerRadius="18">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+        <!-- ═══════════════ VIDEO AREA ═══════════════════ -->
+        <Grid Grid.Row="0" Background="#0A0A0A">
 
-                <StackPanel>
-                    <TextBlock Foreground="#F3F4F6"
-                               FontSize="24"
-                               FontWeight="SemiBold"
-                               Text="Lior Player" />
-                    <TextBlock Margin="0,6,0,0"
-                               Foreground="#9CA3AF"
-                               FontSize="13"
-                               Text="MVVM + DI + Generic Host skeleton" />
-                </StackPanel>
+            <!-- mpv render surface -->
+            <local:MpvHost x:Name="VideoHost" />
 
-                <Border Grid.Row="1"
-                        Margin="0,24,0,0"
-                        Background="#0F1218"
-                        BorderBrush="#313A49"
-                        BorderThickness="1"
-                        CornerRadius="14">
-                    <Grid>
-                        <local:MpvHost x:Name="VideoHost" />
+            <!-- No-media placeholder (collapses once a file is loaded) -->
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        IsHitTestVisible="False">
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasSelectedMedia}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+                <TextBlock FontFamily="Segoe MDL2 Assets"
+                           FontSize="52"
+                           Foreground="#242424"
+                           HorizontalAlignment="Center"
+                           Text="&#xE8B7;" />
+                <TextBlock FontSize="16"
+                           FontWeight="Light"
+                           Foreground="#2A2A2A"
+                           HorizontalAlignment="Center"
+                           Margin="0,14,0,0"
+                           Text="Lior" />
+                <TextBlock FontSize="12"
+                           Foreground="#232323"
+                           HorizontalAlignment="Center"
+                           Margin="0,6,0,0"
+                           Text="Open a file to begin playback" />
+            </StackPanel>
 
-                        <Border Margin="16"
-                                Padding="10,6"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Top"
-                                Background="#AA0B0F14"
-                                CornerRadius="999"
-                                IsHitTestVisible="False">
-                            <TextBlock Foreground="#D1D5DB"
-                                       FontSize="12"
-                                       FontWeight="SemiBold"
-                                       Text="Embedded mpv surface" />
-                        </Border>
-                    </Grid>
-                </Border>
-            </Grid>
-        </Border>
+            <!-- Media title overlay — top-left -->
+            <!-- Note: WPF/HwndHost airspace limitation — visible only when mpv surface is idle -->
+            <Border Margin="14,12,0,0"
+                    Padding="9,4,10,5"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Background="#CC000000"
+                    CornerRadius="4"
+                    IsHitTestVisible="False">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasSelectedMedia}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock FontSize="12"
+                           Foreground="#C4C4C4"
+                           MaxWidth="520"
+                           Text="{Binding MediaTitle}"
+                           TextTrimming="CharacterEllipsis" />
+            </Border>
 
+            <!-- Paused badge — top-right -->
+            <Border Margin="0,12,14,0"
+                    Padding="7,3,8,4"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Background="#CC000000"
+                    CornerRadius="4"
+                    IsHitTestVisible="False">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPaused}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock FontSize="10"
+                           FontWeight="SemiBold"
+                           Foreground="#787878"
+                           Text="PAUSED" />
+            </Border>
+
+        </Grid>
+
+        <!-- ═══════════════ CONTROL BAR ══════════════════ -->
         <Border Grid.Row="1"
-                Padding="18"
-                Background="#171B22"
-                BorderBrush="#2B3340"
-                BorderThickness="1"
-                CornerRadius="18">
+                Background="#161616"
+                BorderBrush="#242424"
+                BorderThickness="0,1,0,0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="52" />
                 </Grid.RowDefinitions>
 
-                <UniformGrid Columns="4" Margin="0,0,0,16">
-                    <Button Margin="0,0,12,0"
-                            Padding="16,10"
-                            Command="{Binding OpenFileCommand}"
-                            Content="파일 열기" />
-                    <Button Margin="0,0,12,0"
-                            Padding="16,10"
-                            Command="{Binding PlayCommand}"
-                            Content="재생" />
-                    <Button Margin="0,0,12,0"
-                            Padding="16,10"
-                            Command="{Binding PauseCommand}"
-                            Content="일시정지" />
-                    <Button Padding="16,10"
-                            Command="{Binding StopCommand}"
-                            Content="정지" />
-                </UniformGrid>
+                <!-- Seek bar -->
+                <Slider x:Name="SeekSlider"
+                        Grid.Row="0"
+                        Margin="16,10,16,0"
+                        Minimum="0"
+                        Maximum="{Binding DurationSeconds}"
+                        Value="{Binding ElapsedSeconds, Mode=OneWay}"
+                        IsEnabled="{Binding IsSeekAvailable}"
+                        Style="{StaticResource PlayerSlider}"
+                        ToolTipService.ShowOnDisabled="True"
+                        ToolTip="재생 위치 이동" />
 
-                <StackPanel Grid.Row="1" Margin="0,0,0,10">
-                    <TextBlock Foreground="#9CA3AF"
-                               FontSize="12"
-                               Text="선택한 파일" />
-                    <Border Margin="0,4,0,0"
-                            Padding="12,10"
-                            Background="#11161D"
-                            BorderBrush="#2B3340"
-                            BorderThickness="1"
-                            CornerRadius="10">
-                        <TextBlock Foreground="#F3F4F6"
-                                   FontSize="13"
-                                   Text="{Binding CurrentMediaPath}"
-                                   TextTrimming="CharacterEllipsis" />
-                    </Border>
-                </StackPanel>
-
-                <Grid Grid.Row="2">
+                <!-- Controls row -->
+                <Grid Grid.Row="1" Margin="12,0">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel>
-                        <TextBlock Foreground="#9CA3AF"
-                                   FontSize="12"
-                                   Text="상태 메시지" />
-                        <TextBlock Margin="0,4,0,0"
-                                   Foreground="#D1D5DB"
-                                   FontSize="13"
-                                   Text="{Binding StatusText}" />
+                    <!-- ── Left: Open + transport ───────── -->
+                    <StackPanel Grid.Column="0"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+
+                        <Button Command="{Binding OpenFileCommand}"
+                                Style="{StaticResource PlayerIconButton}"
+                                ToolTip="파일 열기">
+                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE8B7;" />
+                        </Button>
+
+                        <Rectangle Width="1" Height="16" Margin="6,0"
+                                   Fill="#282828" VerticalAlignment="Center" />
+
+                        <!-- Previous track — placeholder -->
+                        <Button IsEnabled="False"
+                                Margin="0,0,2,0"
+                                Style="{StaticResource PlayerIconButton}"
+                                ToolTipService.ShowOnDisabled="True"
+                                ToolTip="이전 트랙 — 준비 중">
+                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE892;" />
+                        </Button>
+
+                        <!-- Play -->
+                        <Button Width="40" Height="40"
+                                Margin="0,0,2,0"
+                                Command="{Binding PlayCommand}"
+                                Style="{StaticResource PlayerIconButton}"
+                                ToolTip="재생">
+                            <TextBlock Style="{StaticResource IconGlyph}"
+                                       FontSize="18"
+                                       Text="&#xE768;" />
+                        </Button>
+
+                        <!-- Pause -->
+                        <Button Margin="0,0,2,0"
+                                Command="{Binding PauseCommand}"
+                                Style="{StaticResource PlayerIconButton}"
+                                ToolTip="일시정지">
+                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE769;" />
+                        </Button>
+
+                        <!-- Stop -->
+                        <Button Margin="0,0,2,0"
+                                Command="{Binding StopCommand}"
+                                Style="{StaticResource PlayerIconButton}"
+                                ToolTip="정지">
+                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE71A;" />
+                        </Button>
+
+                        <!-- Next track — placeholder -->
+                        <Button IsEnabled="False"
+                                Style="{StaticResource PlayerIconButton}"
+                                ToolTipService.ShowOnDisabled="True"
+                                ToolTip="다음 트랙 — 준비 중">
+                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE893;" />
+                        </Button>
+
                     </StackPanel>
 
-                    <StackPanel Grid.Column="1" Margin="24,0,0,0">
-                        <TextBlock Foreground="#9CA3AF"
+                    <!-- ── Center: elapsed / duration ───── -->
+                    <StackPanel Grid.Column="1"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center">
+                        <TextBlock FontFamily="Consolas"
                                    FontSize="12"
-                                   Text="재생 상태" />
-                        <Border Margin="0,4,0,0"
-                                Padding="12,6"
-                                HorizontalAlignment="Right"
-                                Background="#202733"
-                                CornerRadius="999">
-                            <TextBlock Foreground="#C7D2FE"
-                                       FontSize="12"
-                                       FontWeight="SemiBold"
-                                       Text="{Binding PlaybackState}" />
-                        </Border>
+                                   Foreground="#747474"
+                                   Text="{Binding ElapsedText}" />
+                        <TextBlock FontSize="12"
+                                   Foreground="#353535"
+                                   Margin="5,0"
+                                   Text="/" />
+                        <TextBlock FontFamily="Consolas"
+                                   FontSize="12"
+                                   Foreground="#484848"
+                                   Text="{Binding DurationText}" />
+                    </StackPanel>
+
+                    <!-- ── Right: volume + fullscreen + settings ── -->
+                    <StackPanel Grid.Column="2"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+
+                        <!-- Volume icon -->
+                        <Button Margin="0,0,2,0"
+                                Style="{StaticResource PlayerIconButton}"
+                                ToolTip="볼륨">
+                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE767;" />
+                        </Button>
+
+                        <!-- Volume slider -->
+                        <Slider x:Name="VolumeSlider"
+                                Width="72"
+                                Minimum="0" Maximum="100"
+                                Value="{Binding VolumeLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Margin="0,0,8,0"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource PlayerSlider}"
+                                ToolTip="볼륨 조절" />
+
+                        <Rectangle Width="1" Height="16" Margin="4,0"
+                                   Fill="#282828" VerticalAlignment="Center" />
+
+                        <!-- Fullscreen — placeholder -->
+                        <Button IsEnabled="False"
+                                Margin="2,0"
+                                Style="{StaticResource PlayerIconButton}"
+                                ToolTipService.ShowOnDisabled="True"
+                                ToolTip="전체화면 — 준비 중">
+                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE740;" />
+                        </Button>
+
+                        <!-- Settings — placeholder -->
+                        <Button IsEnabled="False"
+                                Style="{StaticResource PlayerIconButton}"
+                                ToolTipService.ShowOnDisabled="True"
+                                ToolTip="설정 — 준비 중">
+                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE713;" />
+                        </Button>
+
                     </StackPanel>
                 </Grid>
+
             </Grid>
         </Border>
+
     </Grid>
 </Window>

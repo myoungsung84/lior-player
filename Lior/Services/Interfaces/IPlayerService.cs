@@ -8,6 +8,8 @@ public interface IPlayerService
 
     string? CurrentMediaPath { get; }
 
+    double Volume { get; }
+
     void SetRenderTarget(nint windowHandle);
 
     void Shutdown();
@@ -19,4 +21,12 @@ public interface IPlayerService
     bool Pause();
 
     bool Stop();
+
+    double GetPositionSeconds();
+
+    double GetDurationSeconds();
+
+    bool Seek(double positionSeconds);
+
+    bool SetVolume(double volume);
 }
