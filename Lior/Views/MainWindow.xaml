@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Lior.Views"
         mc:Ignorable="d"
-        Title="Lior"
+        Title="{Binding WindowTitle}"
         Width="1080"
         Height="660"
         MinWidth="640"
@@ -46,7 +46,7 @@
                                 <Setter Property="Foreground" Value="#FFFFFF" />
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Foreground" Value="#303030" />
+                                <Setter Property="Foreground" Value="#3E3E3E" />
                                 <Setter Property="Cursor" Value="Arrow" />
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -71,15 +71,23 @@
                     <ControlTemplate TargetType="Slider">
                         <Border x:Name="HitArea"
                                 Background="{TemplateBinding Background}"
-                                Padding="0,8">
+                                Padding="0,6">
                             <Grid x:Name="Root" Height="20" VerticalAlignment="Center">
                                 <Track x:Name="PART_Track" VerticalAlignment="Center">
                                 <Track.DecreaseRepeatButton>
                                     <RepeatButton Focusable="False">
                                         <RepeatButton.Template>
                                             <ControlTemplate TargetType="RepeatButton">
-                                                <Border Height="3" Background="#686868"
+                                                <Border x:Name="DecreaseTrack"
+                                                        Height="3"
+                                                        Background="#686868"
                                                         CornerRadius="1.5,0,0,1.5" />
+                                                <ControlTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Slider}}" Value="True">
+                                                        <Setter TargetName="DecreaseTrack" Property="Height" Value="4" />
+                                                        <Setter TargetName="DecreaseTrack" Property="Background" Value="#7B7B7B" />
+                                                    </DataTrigger>
+                                                </ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </RepeatButton.Template>
                                     </RepeatButton>
@@ -88,8 +96,16 @@
                                     <RepeatButton Focusable="False">
                                         <RepeatButton.Template>
                                             <ControlTemplate TargetType="RepeatButton">
-                                                <Border Height="3" Background="#2C2C2C"
+                                                <Border x:Name="IncreaseTrack"
+                                                        Height="3"
+                                                        Background="#2C2C2C"
                                                         CornerRadius="0,1.5,1.5,0" />
+                                                <ControlTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Slider}}" Value="True">
+                                                        <Setter TargetName="IncreaseTrack" Property="Height" Value="4" />
+                                                        <Setter TargetName="IncreaseTrack" Property="Background" Value="#383838" />
+                                                    </DataTrigger>
+                                                </ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </RepeatButton.Template>
                                     </RepeatButton>
@@ -160,17 +176,17 @@
                 </StackPanel.Style>
                 <TextBlock FontFamily="Segoe MDL2 Assets"
                            FontSize="52"
-                           Foreground="#242424"
+                           Foreground="#2E2E2E"
                            HorizontalAlignment="Center"
                            Text="&#xE8B7;" />
                 <TextBlock FontSize="16"
                            FontWeight="Light"
-                           Foreground="#2A2A2A"
+                           Foreground="#333333"
                            HorizontalAlignment="Center"
                            Margin="0,14,0,0"
                            Text="Lior" />
                 <TextBlock FontSize="12"
-                           Foreground="#232323"
+                           Foreground="#2C2C2C"
                            HorizontalAlignment="Center"
                            Margin="0,6,0,0"
                            Text="Open a file to begin playback" />
@@ -231,8 +247,9 @@
         <!-- ═══════════════ CONTROL BAR ══════════════════ -->
         <Border Grid.Row="1"
                 Background="#161616"
-                BorderBrush="#242424"
-                BorderThickness="0,1,0,0">
+                BorderBrush="#282828"
+                BorderThickness="0,1,0,0"
+                Padding="0,0,0,3">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -242,18 +259,17 @@
                 <!-- Seek bar -->
                 <Slider x:Name="SeekSlider"
                         Grid.Row="0"
-                        Margin="16,10,16,0"
+                        Margin="14,8,14,0"
                         Minimum="0"
                         Maximum="{Binding DurationSeconds}"
                         Value="{Binding ElapsedSeconds, Mode=OneWay}"
                         IsEnabled="{Binding IsSeekAvailable}"
-                        Height="24"
                         Style="{StaticResource PlayerSlider}"
                         ToolTipService.ShowOnDisabled="True"
                         ToolTip="재생 위치 이동" />
 
                 <!-- Controls row -->
-                <Grid Grid.Row="1" Margin="12,0">
+                <Grid Grid.Row="1" Margin="10,0,10,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
@@ -272,7 +288,7 @@
                         </Button>
 
                         <Rectangle Width="1" Height="16" Margin="6,0"
-                                   Fill="#282828" VerticalAlignment="Center" />
+                                   Fill="#2E2E2E" VerticalAlignment="Center" />
 
                         <!-- Previous track — placeholder -->
                         <Button IsEnabled="False"
@@ -283,23 +299,15 @@
                             <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE892;" />
                         </Button>
 
-                        <!-- Play -->
+                        <!-- Play / Pause toggle -->
                         <Button Width="40" Height="40"
                                 Margin="0,0,2,0"
-                                Command="{Binding PlayCommand}"
+                                Command="{Binding TogglePlayPauseCommand}"
                                 Style="{StaticResource PlayerIconButton}"
-                                ToolTip="재생">
+                                ToolTip="{Binding TogglePlaybackToolTip}">
                             <TextBlock Style="{StaticResource IconGlyph}"
                                        FontSize="18"
-                                       Text="&#xE768;" />
-                        </Button>
-
-                        <!-- Pause -->
-                        <Button Margin="0,0,2,0"
-                                Command="{Binding PauseCommand}"
-                                Style="{StaticResource PlayerIconButton}"
-                                ToolTip="일시정지">
-                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE769;" />
+                                       Text="{Binding TogglePlaybackGlyph}" />
                         </Button>
 
                         <!-- Stop -->
@@ -327,15 +335,15 @@
                                 VerticalAlignment="Center">
                         <TextBlock FontFamily="Consolas"
                                    FontSize="12"
-                                   Foreground="#747474"
+                                   Foreground="#8A8A8A"
                                    Text="{Binding ElapsedText}" />
                         <TextBlock FontSize="12"
-                                   Foreground="#353535"
+                                   Foreground="#3E3E3E"
                                    Margin="5,0"
                                    Text="/" />
                         <TextBlock FontFamily="Consolas"
                                    FontSize="12"
-                                   Foreground="#484848"
+                                   Foreground="#565656"
                                    Text="{Binding DurationText}" />
                     </StackPanel>
 
@@ -344,12 +352,13 @@
                                 Orientation="Horizontal"
                                 VerticalAlignment="Center">
 
-                        <!-- Volume icon -->
+                        <!-- Volume icon / mute toggle -->
                         <Button Margin="0,0,2,0"
                                 Command="{Binding ToggleMuteCommand}"
                                 Style="{StaticResource PlayerIconButton}"
                                 ToolTip="음소거">
-                            <TextBlock FontSize="14"
+                            <TextBlock FontFamily="Segoe UI Emoji"
+                                       FontSize="14"
                                        Text="{Binding MuteButtonText}" />
                         </Button>
 
@@ -359,13 +368,12 @@
                                 Minimum="0" Maximum="100"
                                 Value="{Binding VolumeLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 Margin="0,0,8,0"
-                                Height="24"
                                 VerticalAlignment="Center"
                                 Style="{StaticResource PlayerSlider}"
                                 ToolTip="볼륨 조절" />
 
                         <Rectangle Width="1" Height="16" Margin="4,0"
-                                   Fill="#282828" VerticalAlignment="Center" />
+                                   Fill="#2E2E2E" VerticalAlignment="Center" />
 
                         <!-- Fullscreen — placeholder -->
                         <Button IsEnabled="False"

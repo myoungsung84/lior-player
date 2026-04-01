@@ -59,7 +59,15 @@ public partial class MainWindowViewModel : ObservableObject
 
     public bool IsPaused => PlaybackState is PlaybackState.Paused;
 
+    public bool IsPlaying => PlaybackState is PlaybackState.Playing;
+
     public string MuteButtonText => IsMuted ? "🔇" : "🔊";
+
+    public string TogglePlaybackGlyph => IsPlaying ? "\uE769" : "\uE768";
+
+    public string TogglePlaybackToolTip => IsPlaying ? "일시정지" : "재생";
+
+    public string WindowTitle => string.IsNullOrWhiteSpace(MediaTitle) ? "Lior" : $"{MediaTitle} - Lior";
 
     public string MediaTitle =>
         string.IsNullOrWhiteSpace(_playerService.CurrentMediaPath)
@@ -208,6 +216,7 @@ public partial class MainWindowViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(HasSelectedMedia));
         OnPropertyChanged(nameof(MediaTitle));
+        OnPropertyChanged(nameof(WindowTitle));
         RefreshCommandStates();
     }
 
@@ -217,6 +226,9 @@ public partial class MainWindowViewModel : ObservableObject
         OnPropertyChanged(nameof(CanPause));
         OnPropertyChanged(nameof(CanStop));
         OnPropertyChanged(nameof(IsPaused));
+        OnPropertyChanged(nameof(IsPlaying));
+        OnPropertyChanged(nameof(TogglePlaybackGlyph));
+        OnPropertyChanged(nameof(TogglePlaybackToolTip));
         RefreshCommandStates();
     }
 
@@ -272,7 +284,11 @@ public partial class MainWindowViewModel : ObservableObject
         OnPropertyChanged(nameof(CanPause));
         OnPropertyChanged(nameof(CanStop));
         OnPropertyChanged(nameof(IsPaused));
+        OnPropertyChanged(nameof(IsPlaying));
+        OnPropertyChanged(nameof(TogglePlaybackGlyph));
+        OnPropertyChanged(nameof(TogglePlaybackToolTip));
         OnPropertyChanged(nameof(MuteButtonText));
+        OnPropertyChanged(nameof(WindowTitle));
         RefreshCommandStates();
     }
 
