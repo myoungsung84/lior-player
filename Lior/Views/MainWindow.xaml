@@ -24,8 +24,6 @@
     </shell:WindowChrome.WindowChrome>
 
     <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-
         <Style x:Key="PlayerIconButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
@@ -169,7 +167,7 @@
 
     <!--
     ╔══════════════════════════════════════════════════════════╗
-    ║  ROOT LAYOUT  (3 rows × 1 column)                       ║
+    ║  ROOT LAYOUT  (2 rows × 1 column)                       ║
     ║                                                         ║
     ║  Row 0 │ TitleBar        36 px                          ║
     ║  Row 1 │ MainContent     *                              ║
@@ -180,8 +178,8 @@
     -->
     <Grid x:Name="RootLayout" Background="#0A0A0A">
         <Grid.RowDefinitions>
-            <RowDefinition Height="36" />   <!-- TitleBar -->
-            <RowDefinition Height="*" />    <!-- MainContent -->
+            <RowDefinition x:Name="TitleBarRow" Height="36" />   <!-- TitleBar -->
+            <RowDefinition x:Name="MainContentRow" Height="*" />    <!-- MainContent -->
         </Grid.RowDefinitions>
 
         <!-- ════════════════════════════════
@@ -285,19 +283,20 @@
              Col 0: PlayerShell (*) = VideoStage + BottomPlayerBar
              Col 1: FilePanel   (Auto)
              ════════════════════════════════ -->
-        <Grid Grid.Row="1"
+        <Grid x:Name="MainContentRoot"
+              Grid.Row="1"
               Margin="8,6,8,8"
               Background="#090909">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition x:Name="FilePanelColumn" Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <!-- Left complete player shell -->
-            <Grid Grid.Column="0" Background="#090909">
+            <Grid x:Name="PlayerShellRoot" Grid.Column="0" Background="#090909">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
-                    <RowDefinition Height="80" />
+                    <RowDefinition x:Name="BottomPlayerBarRow" Height="80" />
                 </Grid.RowDefinitions>
 
                 <!-- Video stage -->
@@ -330,8 +329,9 @@
                     </StackPanel>
                 </Grid>
 
-                <!-- Bottom player bar belongs to the left player shell only -->
-                <Border Grid.Row="1"
+                <!-- Bottom player bar in the left player shell -->
+                <Border x:Name="BottomPlayerBarRoot"
+                        Grid.Row="1"
                         Background="#0A0A0A"
                         BorderBrush="#16FFFFFF"
                         BorderThickness="0,1,0,0">
@@ -466,22 +466,13 @@
                 </Border>
             </Grid>
 
-            <!-- FilePanel: attached playlist strip, not a detached sidebar -->
-                <Border Grid.Column="1"
+            <!-- File panel -->
+                <Border x:Name="FilePanelRoot"
+                        Grid.Column="1"
                         Width="186"
                         Background="#0D0D0D"
                         BorderBrush="#16FFFFFF"
                         BorderThickness="1,0,0,0">
-                    <Border.Style>
-                        <Style TargetType="Border">
-                            <Setter Property="Visibility" Value="Visible" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsFilePanelOpen}" Value="False">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />

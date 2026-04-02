@@ -4,7 +4,9 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shell;
 using System.Windows.Threading;
+using System.ComponentModel;
 using Lior.Services.Interfaces;
 using Lior.ViewModels;
 
@@ -12,6 +14,8 @@ namespace Lior.Views;
 
 public partial class MainWindow : Window
 {
+    private const double FilePanelDockWidth = 186;
+
     private readonly IPlayerService _playerService;
     private readonly DispatcherTimer _surfaceClickTimer;
     private HwndSource? _windowSource;
@@ -20,9 +24,15 @@ public partial class MainWindow : Window
     private Rect _boundsBeforeFullscreen = Rect.Empty;
     private bool _renderTargetAssigned;
     private MainWindowViewModel? _pendingSurfaceClickViewModel;
+    private readonly MainWindowViewModel _viewModel;
+    private bool _isAdjustingWindowBounds;
+    private double _trackedPlayerWidth;
+    private bool _topmostBeforeFullscreen;
+    private Thickness _resizeBorderThicknessBeforeFullscreen = new(7);
 
     public MainWindow(MainWindowViewModel viewModel, IPlayerService playerService)
     {
+        _viewModel = viewModel;
         _playerService = playerService;
         _surfaceClickTimer = new DispatcherTimer
         {
@@ -30,13 +40,16 @@ public partial class MainWindow : Window
         };
         _surfaceClickTimer.Tick += OnSurfaceClickTimerTick;
         InitializeComponent();
-        DataContext = viewModel;
+        DataContext = _viewModel;
 
         SourceInitialized += OnSourceInitialized;
         Loaded += OnLoaded;
         ContentRendered += OnContentRendered;
         Closed += OnClosed;
         PreviewKeyDown += OnPreviewKeyDown;
+        SizeChanged += OnWindowSizeChanged;
+
+        _viewModel.PropertyChanged += OnViewModelPropertyChanged;
 
         SeekSlider.PreviewMouseLeftButtonDown += OnSeekSliderPreviewMouseLeftButtonDown;
         SeekSlider.ValueChanged += OnSeekSliderValueChanged;
@@ -50,6 +63,11 @@ public partial class MainWindow : Window
     {
         _windowSource = (HwndSource?)PresentationSource.FromVisual(this);
         _windowSource?.AddHook(WndProc);
+        var windowChrome = WindowChrome.GetWindowChrome(this);
+        if (windowChrome is not null)
+        {
+            _resizeBorderThicknessBeforeFullscreen = windowChrome.ResizeBorderThickness;
+        }
         UpdateMaximizedPadding();
         AttachRenderTarget();
     }
@@ -57,6 +75,8 @@ public partial class MainWindow : Window
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         AttachRenderTarget();
+        UpdateTrackedPlayerWidthFromCurrentBounds();
+        ApplyWindowModeLayout();
     }
 
     private void OnContentRendered(object? sender, EventArgs e)
@@ -71,6 +91,7 @@ public partial class MainWindow : Window
             _windowSource.RemoveHook(WndProc);
         }
 
+        _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
         _playerService.Shutdown();
     }
 
@@ -260,6 +281,27 @@ public partial class MainWindow : Window
     private void OnWindowStateChanged(object sender, EventArgs e)
     {
         UpdateMaximizedPadding();
+        ApplyWindowModeLayout();
+    }
+
+    private void OnWindowSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (_isFullscreen || _isAdjustingWindowBounds || WindowState != WindowState.Normal)
+        {
+            return;
+        }
+
+        UpdateTrackedPlayerWidthFromCurrentBounds();
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(MainWindowViewModel.IsFilePanelOpen))
+        {
+            return;
+        }
+
+        Dispatcher.InvokeAsync(ApplyFilePanelPolicy, DispatcherPriority.Normal);
     }
 
     private static bool IsThumbInteraction(DependencyObject? source)
@@ -404,23 +446,29 @@ public partial class MainWindow : Window
         _isFullscreen = true;
         _windowStateBeforeFullscreen = WindowState;
         _boundsBeforeFullscreen = new Rect(Left, Top, Width, Height);
+        _topmostBeforeFullscreen = Topmost;
 
         WindowState = WindowState.Normal;
         ResizeMode = ResizeMode.NoResize;
+        Topmost = true;
         TitleBarRoot.Visibility = Visibility.Collapsed;
+        TitleBarRoot.IsHitTestVisible = false;
         Left = monitorInfo.MonitorArea.Left;
         Top = monitorInfo.MonitorArea.Top;
         Width = monitorInfo.MonitorArea.Right - monitorInfo.MonitorArea.Left;
         Height = monitorInfo.MonitorArea.Bottom - monitorInfo.MonitorArea.Top;
         FullscreenGlyph.Text = "\uE73F";
         UpdateMaximizedPadding();
+        ApplyWindowModeLayout();
     }
 
     private void ExitFullscreen()
     {
         _isFullscreen = false;
         ResizeMode = ResizeMode.CanResize;
+        Topmost = _topmostBeforeFullscreen;
         TitleBarRoot.Visibility = Visibility.Visible;
+        TitleBarRoot.IsHitTestVisible = true;
 
         if (_boundsBeforeFullscreen != Rect.Empty)
         {
@@ -433,6 +481,112 @@ public partial class MainWindow : Window
         WindowState = _windowStateBeforeFullscreen;
         FullscreenGlyph.Text = "\uE740";
         UpdateMaximizedPadding();
+        UpdateTrackedPlayerWidthFromCurrentBounds();
+        ApplyWindowModeLayout();
+        ApplyFilePanelPolicy();
+    }
+
+    private void ApplyFilePanelPolicy()
+    {
+        if (_isFullscreen)
+        {
+            ApplyWindowModeLayout();
+            return;
+        }
+
+        ApplyDockedWidthForNormalWindow();
+        ApplyWindowModeLayout();
+    }
+
+    private void ApplyDockedWidthForNormalWindow()
+    {
+        if (WindowState != WindowState.Normal)
+        {
+            return;
+        }
+
+        var targetWidth = _viewModel.IsFilePanelOpen
+            ? _trackedPlayerWidth + GetEffectiveFilePanelWidth()
+            : _trackedPlayerWidth;
+
+        SetWindowWidthKeepingLeft(targetWidth);
+    }
+
+    private void SetWindowWidthKeepingLeft(double targetWidth)
+    {
+        var boundedWidth = Math.Max(MinWidth, Math.Round(targetWidth));
+        if (Math.Abs(Width - boundedWidth) < 0.5)
+        {
+            return;
+        }
+
+        _isAdjustingWindowBounds = true;
+        try
+        {
+            Width = boundedWidth;
+        }
+        finally
+        {
+            _isAdjustingWindowBounds = false;
+        }
+    }
+
+    private void UpdateTrackedPlayerWidthFromCurrentBounds()
+    {
+        var panelWidth = _viewModel.IsFilePanelOpen ? GetEffectiveFilePanelWidth() : 0;
+        var candidateWidth = ActualWidth > 0 ? ActualWidth : Width;
+        candidateWidth -= panelWidth;
+        _trackedPlayerWidth = Math.Max(MinWidth, Math.Round(candidateWidth));
+    }
+
+    private double GetEffectiveFilePanelWidth()
+    {
+        return FilePanelRoot.Width > 0 ? FilePanelRoot.Width : FilePanelDockWidth;
+    }
+
+    private void ApplyWindowModeLayout()
+    {
+        if (_isFullscreen)
+        {
+            TitleBarRow.Height = new GridLength(0);
+            MainContentRow.Height = new GridLength(1, GridUnitType.Star);
+            BottomPlayerBarRow.Height = new GridLength(0);
+            FilePanelColumn.Width = new GridLength(0);
+            BottomPlayerBarRoot.Visibility = Visibility.Collapsed;
+            FilePanelRoot.Visibility = Visibility.Collapsed;
+            SetFullscreenChromeState(true);
+            return;
+        }
+
+        TitleBarRow.Height = new GridLength(36);
+        MainContentRow.Height = new GridLength(1, GridUnitType.Star);
+        BottomPlayerBarRow.Height = new GridLength(80);
+        Grid.SetRow(BottomPlayerBarRoot, 1);
+        BottomPlayerBarRoot.VerticalAlignment = VerticalAlignment.Stretch;
+        Panel.SetZIndex(BottomPlayerBarRoot, 0);
+        BottomPlayerBarRoot.Visibility = Visibility.Visible;
+
+        FilePanelColumn.Width = _viewModel.IsFilePanelOpen ? GridLength.Auto : new GridLength(0);
+        Grid.SetColumn(FilePanelRoot, 1);
+        Grid.SetColumnSpan(FilePanelRoot, 1);
+        FilePanelRoot.HorizontalAlignment = HorizontalAlignment.Stretch;
+        FilePanelRoot.VerticalAlignment = VerticalAlignment.Stretch;
+        Panel.SetZIndex(FilePanelRoot, 0);
+        FilePanelRoot.Visibility = _viewModel.IsFilePanelOpen ? Visibility.Visible : Visibility.Collapsed;
+        SetFullscreenChromeState(false);
+    }
+
+    private void SetFullscreenChromeState(bool isFullscreenLayout)
+    {
+        var windowChrome = WindowChrome.GetWindowChrome(this);
+        if (windowChrome is null)
+        {
+            return;
+        }
+
+        windowChrome.ResizeBorderThickness = isFullscreenLayout
+            ? new Thickness(0)
+            : _resizeBorderThicknessBeforeFullscreen;
     }
 
     private nint WndProc(nint hwnd, int msg, nint wParam, nint lParam, ref bool handled)
