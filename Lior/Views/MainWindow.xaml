@@ -14,7 +14,7 @@
         StateChanged="OnWindowStateChanged"
         WindowStyle="None"
         ResizeMode="CanResize"
-        Background="#0E0E0E"
+        Background="#0A0A0A"
         FontFamily="Segoe UI">
 
     <shell:WindowChrome.WindowChrome>
@@ -28,13 +28,12 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
-        <!-- ─── Player icon button ───────────────────────── -->
         <Style x:Key="PlayerIconButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Foreground" Value="#D2D2D2" />
-            <Setter Property="Width" Value="36" />
-            <Setter Property="Height" Value="36" />
+            <Setter Property="Foreground" Value="#C8C8C8" />
+            <Setter Property="Width" Value="32" />
+            <Setter Property="Height" Value="32" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Padding" Value="0" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -43,7 +42,7 @@
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="Root"
                                 Background="{TemplateBinding Background}"
-                                CornerRadius="5"
+                                CornerRadius="4"
                                 Width="{TemplateBinding Width}"
                                 Height="{TemplateBinding Height}">
                             <ContentPresenter HorizontalAlignment="Center"
@@ -51,15 +50,15 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Root" Property="Background" Value="#26FFFFFF" />
-                                <Setter Property="Foreground" Value="#F5F5F5" />
+                                <Setter TargetName="Root" Property="Background" Value="#22FFFFFF" />
+                                <Setter Property="Foreground" Value="#F0F0F0" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Root" Property="Background" Value="#36FFFFFF" />
+                                <Setter TargetName="Root" Property="Background" Value="#33FFFFFF" />
                                 <Setter Property="Foreground" Value="#FFFFFF" />
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Foreground" Value="#6E6E6E" />
+                                <Setter Property="Foreground" Value="#424242" />
                                 <Setter Property="Cursor" Value="Arrow" />
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -68,13 +67,11 @@
             </Setter>
         </Style>
 
-        <!-- ─── Icon glyph TextBlock (inherits Foreground from parent Button) ── -->
         <Style x:Key="IconGlyph" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
-            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontSize" Value="14" />
         </Style>
 
-        <!-- ─── Seek / volume slider ─────────────────────── -->
         <Style x:Key="PlayerSlider" TargetType="Slider">
             <Setter Property="IsMoveToPointEnabled" Value="False" />
             <Setter Property="Focusable" Value="False" />
@@ -84,57 +81,57 @@
                     <ControlTemplate TargetType="Slider">
                         <Border x:Name="HitArea"
                                 Background="{TemplateBinding Background}"
-                                Padding="0,6">
-                            <Grid x:Name="Root" Height="20" VerticalAlignment="Center">
+                                Padding="0,5">
+                            <Grid Height="18" VerticalAlignment="Center">
                                 <Track x:Name="PART_Track" VerticalAlignment="Center">
-                                <Track.DecreaseRepeatButton>
-                                    <RepeatButton Focusable="False">
-                                        <RepeatButton.Template>
-                                            <ControlTemplate TargetType="RepeatButton">
-                                                <Border x:Name="DecreaseTrack"
-                                                        Height="3"
-                                                        Background="#B8B8B8"
-                                                        CornerRadius="1.5,0,0,1.5" />
-                                                <ControlTemplate.Triggers>
-                                                    <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Slider}}" Value="True">
-                                                        <Setter TargetName="DecreaseTrack" Property="Height" Value="4" />
-                                                        <Setter TargetName="DecreaseTrack" Property="Background" Value="#D0D0D0" />
-                                                    </DataTrigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </RepeatButton.Template>
-                                    </RepeatButton>
-                                </Track.DecreaseRepeatButton>
-                                <Track.IncreaseRepeatButton>
-                                    <RepeatButton Focusable="False">
-                                        <RepeatButton.Template>
-                                            <ControlTemplate TargetType="RepeatButton">
-                                                <Border x:Name="IncreaseTrack"
-                                                        Height="3"
-                                                        Background="#55FFFFFF"
-                                                        CornerRadius="0,1.5,1.5,0" />
-                                                <ControlTemplate.Triggers>
-                                                    <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Slider}}" Value="True">
-                                                        <Setter TargetName="IncreaseTrack" Property="Height" Value="4" />
-                                                        <Setter TargetName="IncreaseTrack" Property="Background" Value="#70FFFFFF" />
-                                                    </DataTrigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </RepeatButton.Template>
-                                    </RepeatButton>
-                                </Track.IncreaseRepeatButton>
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Focusable="False">
+                                            <RepeatButton.Template>
+                                                <ControlTemplate TargetType="RepeatButton">
+                                                    <Border x:Name="DecreaseTrack"
+                                                            Height="3"
+                                                            Background="#A8A8A8"
+                                                            CornerRadius="1.5,0,0,1.5" />
+                                                    <ControlTemplate.Triggers>
+                                                        <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Slider}}" Value="True">
+                                                            <Setter TargetName="DecreaseTrack" Property="Height" Value="4" />
+                                                            <Setter TargetName="DecreaseTrack" Property="Background" Value="#C8C8C8" />
+                                                        </DataTrigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </RepeatButton.Template>
+                                        </RepeatButton>
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Focusable="False">
+                                            <RepeatButton.Template>
+                                                <ControlTemplate TargetType="RepeatButton">
+                                                    <Border x:Name="IncreaseTrack"
+                                                            Height="3"
+                                                            Background="#3CFFFFFF"
+                                                            CornerRadius="0,1.5,1.5,0" />
+                                                    <ControlTemplate.Triggers>
+                                                        <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Slider}}" Value="True">
+                                                            <Setter TargetName="IncreaseTrack" Property="Height" Value="4" />
+                                                            <Setter TargetName="IncreaseTrack" Property="Background" Value="#58FFFFFF" />
+                                                        </DataTrigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </RepeatButton.Template>
+                                        </RepeatButton>
+                                    </Track.IncreaseRepeatButton>
                                     <Track.Thumb>
                                         <Thumb Focusable="False">
                                             <Thumb.Template>
                                                 <ControlTemplate TargetType="Thumb">
                                                     <Ellipse x:Name="ThumbDot"
-                                                             Width="11" Height="11"
-                                                             Fill="#F1F1F1" />
+                                                             Width="10" Height="10"
+                                                             Fill="#EEEEEE" />
                                                     <ControlTemplate.Triggers>
                                                         <Trigger Property="IsMouseOver" Value="True">
                                                             <Setter TargetName="ThumbDot" Property="Fill" Value="#FFFFFF" />
-                                                            <Setter TargetName="ThumbDot" Property="Width" Value="13" />
-                                                            <Setter TargetName="ThumbDot" Property="Height" Value="13" />
+                                                            <Setter TargetName="ThumbDot" Property="Width" Value="12" />
+                                                            <Setter TargetName="ThumbDot" Property="Height" Value="12" />
                                                         </Trigger>
                                                         <Trigger Property="IsDragging" Value="True">
                                                             <Setter TargetName="ThumbDot" Property="Fill" Value="#FFFFFF" />
@@ -149,7 +146,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="HitArea" Property="Opacity" Value="0.25" />
+                                <Setter TargetName="HitArea" Property="Opacity" Value="0.20" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -160,11 +157,11 @@
         <Style x:Key="WindowControlButton" TargetType="Button" BasedOn="{StaticResource PlayerIconButton}">
             <Setter Property="Width" Value="40" />
             <Setter Property="Height" Value="28" />
-            <Setter Property="Foreground" Value="#D6D6D6" />
+            <Setter Property="Foreground" Value="#BEBEBE" />
             <Setter Property="shell:WindowChrome.IsHitTestVisibleInChrome" Value="True" />
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#24FFFFFF" />
+                    <Setter Property="Background" Value="#20FFFFFF" />
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -184,24 +181,35 @@
 
     </Window.Resources>
 
-    <Grid x:Name="RootLayout"
-          Background="#0A0A0A">
+    <!--
+        ROOT LAYOUT
+        ┌─────────────────────────────────────────┐
+        │  TitleBar    36px                        │
+        ├──────────────────────────┬──────────────┤
+        │  VideoStage (*)          │ FilePanel     │
+        │                          │ (224px/0px)   │
+        ├──────────────────────────┴──────────────┤
+        │  BottomBar   80px                        │
+        └─────────────────────────────────────────┘
+    -->
+    <Grid x:Name="RootLayout" Background="#0A0A0A">
         <Grid.RowDefinitions>
-            <RowDefinition Height="40" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="36" />   <!-- TitleBar -->
+            <RowDefinition Height="*" />    <!-- MainStage -->
+            <RowDefinition Height="80" />   <!-- BottomBar — fixed height -->
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />    <!-- VideoStage -->
+            <ColumnDefinition Width="Auto" /> <!-- FilePanel (collapses to 0 when closed) -->
         </Grid.ColumnDefinitions>
 
-        <!-- ═══════════════ TITLE BAR ═══════════════════ -->
+        <!-- ══════════════════════════════════════
+             TITLE BAR — window frame, minimal info
+             ══════════════════════════════════════ -->
         <Border x:Name="TitleBarRoot"
-                Grid.Row="0"
-                Grid.ColumnSpan="2"
-                Background="#55000000"
-                BorderBrush="#1FFFFFFF"
+                Grid.Row="0" Grid.ColumnSpan="2"
+                Background="#38000000"
+                BorderBrush="#14FFFFFF"
                 BorderThickness="0,0,0,1">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -212,19 +220,11 @@
                 <Border Grid.Column="0"
                         Background="Transparent"
                         MouseLeftButtonDown="OnTitleDragSurfaceMouseLeftButtonDown">
-                    <StackPanel Orientation="Horizontal"
-                                VerticalAlignment="Center"
-                                Margin="14,0,0,0">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0,0,0">
                         <TextBlock Text="Lior"
-                                   FontSize="13"
-                                   FontWeight="SemiBold"
-                                   Foreground="#F3F3F3"
-                                   VerticalAlignment="Center" />
-                        <Rectangle Width="1"
-                                   Height="12"
-                                   Margin="10,0,10,0"
-                                   Fill="#2EFFFFFF"
-                                   VerticalAlignment="Center">
+                                   FontSize="12" FontWeight="SemiBold"
+                                   Foreground="#D0D0D0" VerticalAlignment="Center" />
+                        <Rectangle Width="1" Height="10" Margin="10,0,10,0" Fill="#20FFFFFF" VerticalAlignment="Center">
                             <Rectangle.Style>
                                 <Style TargetType="Rectangle">
                                     <Setter Property="Visibility" Value="Collapsed" />
@@ -236,79 +236,45 @@
                                 </Style>
                             </Rectangle.Style>
                         </Rectangle>
-                        <Grid VerticalAlignment="Center">
-                            <TextBlock FontSize="12"
-                                       Foreground="#D3D3D3"
-                                       Text="Simple player"
-                                       TextTrimming="CharacterEllipsis">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Visible" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding HasSelectedMedia}" Value="True">
-                                                <Setter Property="Visibility" Value="Collapsed" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                            <TextBlock FontSize="12"
-                                       Foreground="#D3D3D3"
-                                       MaxWidth="620"
-                                       Text="{Binding MediaTitle}"
-                                       TextTrimming="CharacterEllipsis">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Collapsed" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding HasSelectedMedia}" Value="True">
-                                                <Setter Property="Visibility" Value="Visible" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </Grid>
-                        <Border Margin="10,0,0,0"
-                                Padding="7,2,7,3"
-                                Background="#2AFFFFFF"
-                                CornerRadius="9"
-                                VerticalAlignment="Center"
-                                IsHitTestVisible="False">
-                            <Border.Style>
-                                <Style TargetType="Border">
+                        <TextBlock FontSize="11" Foreground="#484848" Text="No file open" VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasSelectedMedia}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock FontSize="11" Foreground="#B0B0B0"
+                                   MaxWidth="560" Text="{Binding MediaTitle}"
+                                   TextTrimming="CharacterEllipsis" VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
                                     <Setter Property="Visibility" Value="Collapsed" />
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsPaused}" Value="True">
+                                        <DataTrigger Binding="{Binding HasSelectedMedia}" Value="True">
                                             <Setter Property="Visibility" Value="Visible" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </Border.Style>
-                            <TextBlock FontSize="10"
-                                       FontWeight="SemiBold"
-                                       Foreground="#E2E2E2"
-                                       Text="PAUSED" />
-                        </Border>
+                            </TextBlock.Style>
+                        </TextBlock>
                     </StackPanel>
                 </Border>
 
-                <StackPanel Grid.Column="1"
-                            Orientation="Horizontal"
-                            VerticalAlignment="Center"
-                            Margin="0,6,6,6">
-                    <Button Style="{StaticResource WindowControlButton}"
-                            Click="OnMinimizeButtonClick"
-                            ToolTip="최소화">
-                        <TextBlock Style="{StaticResource IconGlyph}" FontSize="12" Text="&#xE921;" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal"
+                            VerticalAlignment="Center" Margin="0,4,4,4">
+                    <Button Style="{StaticResource WindowControlButton}" Click="OnMinimizeButtonClick" ToolTip="최소화">
+                        <TextBlock Style="{StaticResource IconGlyph}" FontSize="11" Text="&#xE921;" />
                     </Button>
-                    <Button Style="{StaticResource WindowControlButton}"
-                            Click="OnMaximizeRestoreButtonClick"
-                            ToolTip="최대화 또는 복원">
+                    <Button Style="{StaticResource WindowControlButton}" Click="OnMaximizeRestoreButtonClick" ToolTip="최대화 또는 복원">
                         <TextBlock>
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock" BasedOn="{StaticResource IconGlyph}">
-                                    <Setter Property="FontSize" Value="12" />
+                                    <Setter Property="FontSize" Value="11" />
                                     <Setter Property="Text" Value="&#xE922;" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=WindowState}" Value="Maximized">
@@ -319,30 +285,35 @@
                             </TextBlock.Style>
                         </TextBlock>
                     </Button>
-                    <Button Style="{StaticResource CloseWindowButton}"
-                            Click="OnCloseButtonClick"
-                            ToolTip="닫기">
-                        <TextBlock Style="{StaticResource IconGlyph}" FontSize="12" Text="&#xE8BB;" />
+                    <Button Style="{StaticResource CloseWindowButton}" Click="OnCloseButtonClick" ToolTip="닫기">
+                        <TextBlock Style="{StaticResource IconGlyph}" FontSize="11" Text="&#xE8BB;" />
                     </Button>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- ═══════════════ VIDEO AREA ═══════════════════ -->
-        <Grid Grid.Row="1"
-              Grid.Column="0"
-              Background="#0A0A0A">
+        <!-- ══════════════════════════════════════
+             MAIN STAGE — VideoStage (Col 0)
+             Outer grid = full stage area.
+             VideoStageWrapper = centering container for video + interaction.
+             Placeholder sits above VideoStageWrapper in z-order; collapses when media loads.
+             ══════════════════════════════════════ -->
+        <Grid Grid.Row="1" Grid.Column="0" Background="#0A0A0A">
 
-            <!-- mpv render surface -->
-            <local:MpvHost x:Name="VideoHost" />
+            <!-- VideoStageWrapper: explicit centering stage — VideoHost fills it entirely -->
+            <Grid x:Name="VideoStageWrapper"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch">
+                <local:MpvHost x:Name="VideoHost"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Stretch" />
+                <!-- Interaction overlay: captures clicks for play/pause and open-file -->
+                <Border Background="Transparent"
+                        MouseLeftButtonDown="OnVideoSurfaceMouseLeftButtonDown" />
+            </Grid>
 
-            <Border Background="Transparent"
-                    MouseLeftButtonDown="OnVideoSurfaceMouseLeftButtonDown" />
-
-            <!-- No-media placeholder (collapses once a file is loaded) -->
-            <StackPanel HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        IsHitTestVisible="False">
+            <!-- No-media placeholder: centered in stage, collapses once media is loaded -->
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
                 <StackPanel.Style>
                     <Style TargetType="StackPanel">
                         <Style.Triggers>
@@ -352,199 +323,25 @@
                         </Style.Triggers>
                     </Style>
                 </StackPanel.Style>
-                <TextBlock FontFamily="Segoe MDL2 Assets"
-                           FontSize="52"
-                           Foreground="#2E2E2E"
-                           HorizontalAlignment="Center"
-                           Text="&#xE8B7;" />
-                <TextBlock FontSize="16"
-                           FontWeight="Light"
-                           Foreground="#333333"
-                           HorizontalAlignment="Center"
-                           Margin="0,14,0,0"
-                           Text="Lior" />
-                <TextBlock FontSize="12"
-                           Foreground="#2C2C2C"
-                           HorizontalAlignment="Center"
-                           Margin="0,6,0,0"
+                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="44" Foreground="#242424"
+                           HorizontalAlignment="Center" Text="&#xE8B7;" />
+                <TextBlock FontSize="13" FontWeight="Light" Foreground="#2C2C2C"
+                           HorizontalAlignment="Center" Margin="0,12,0,0" Text="Lior" />
+                <TextBlock FontSize="11" Foreground="#252525"
+                           HorizontalAlignment="Center" Margin="0,5,0,0"
                            Text="Open a file to begin playback" />
             </StackPanel>
-
         </Grid>
 
-        <Border Grid.Row="2"
-                Grid.ColumnSpan="2"
-                Background="#70000000"
-                BorderBrush="#1FFFFFFF"
-                BorderThickness="0,1,0,0"
-                Padding="0,0,0,3">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="52" />
-                </Grid.RowDefinitions>
-
-                <Slider x:Name="SeekSlider"
-                        Grid.Row="0"
-                        Margin="14,8,14,0"
-                        Minimum="0"
-                        Maximum="{Binding DurationSeconds}"
-                        Value="{Binding ElapsedSeconds, Mode=OneWay}"
-                        IsEnabled="{Binding IsSeekAvailable}"
-                        Style="{StaticResource PlayerSlider}"
-                        ToolTipService.ShowOnDisabled="True"
-                        ToolTip="재생 위치 이동" />
-
-                <Grid Grid.Row="1" Margin="10,0,10,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Column="0"
-                                Orientation="Horizontal"
-                                VerticalAlignment="Center">
-                        <Button Command="{Binding OpenFileCommand}"
-                                Style="{StaticResource PlayerIconButton}"
-                                ToolTip="파일 열기">
-                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE8B7;" />
-                        </Button>
-
-                        <Button Command="{Binding ToggleFilePanelCommand}"
-                                Margin="2,0,0,0"
-                                Style="{StaticResource PlayerIconButton}"
-                                ToolTip="{Binding FilePanelToggleToolTip}">
-                            <TextBlock Style="{StaticResource IconGlyph}"
-                                       Text="{Binding FilePanelToggleGlyph}" />
-                        </Button>
-
-                        <Rectangle Width="1" Height="16" Margin="6,0"
-                                   Fill="#28FFFFFF" VerticalAlignment="Center" />
-
-                        <Button Command="{Binding PlayPreviousCommand}"
-                                Margin="0,0,2,0"
-                                Style="{StaticResource PlayerIconButton}"
-                                ToolTip="이전 트랙">
-                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE892;" />
-                        </Button>
-
-                        <Button Width="40" Height="40"
-                                Margin="0,0,2,0"
-                                Command="{Binding TogglePlayPauseCommand}"
-                                Style="{StaticResource PlayerIconButton}"
-                                ToolTip="{Binding TogglePlaybackToolTip}">
-                            <TextBlock Style="{StaticResource IconGlyph}"
-                                       FontSize="18"
-                                       Text="{Binding TogglePlaybackGlyph}" />
-                        </Button>
-
-                        <Button Margin="0,0,2,0"
-                                Command="{Binding StopCommand}"
-                                Style="{StaticResource PlayerIconButton}"
-                                ToolTip="정지">
-                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE71A;" />
-                        </Button>
-
-                        <Button Command="{Binding PlayNextCommand}"
-                                Style="{StaticResource PlayerIconButton}"
-                                ToolTip="다음 트랙">
-                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE893;" />
-                        </Button>
-                    </StackPanel>
-
-                    <StackPanel Grid.Column="1"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center">
-                        <TextBlock MaxWidth="320"
-                                   HorizontalAlignment="Center"
-                                   FontSize="12"
-                                   Foreground="#E8E8E8"
-                                   Text="{Binding CurrentFileDisplayName}"
-                                   TextTrimming="CharacterEllipsis" />
-                        <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center"
-                                    Margin="0,4,0,0">
-                            <TextBlock FontFamily="Consolas"
-                                       FontSize="12"
-                                       Foreground="#E2E2E2"
-                                       Text="{Binding ElapsedText}" />
-                            <TextBlock FontSize="12"
-                                       Foreground="#88FFFFFF"
-                                       Margin="5,0"
-                                       Text="/" />
-                            <TextBlock FontFamily="Consolas"
-                                       FontSize="12"
-                                       Foreground="#B7B7B7"
-                                       Text="{Binding DurationText}" />
-                            <TextBlock FontSize="11"
-                                       Foreground="#66FFFFFF"
-                                       Margin="10,0,6,0"
-                                       Text="|" />
-                            <TextBlock FontFamily="Consolas"
-                                       FontSize="12"
-                                       Foreground="#CFCFCF"
-                                       Text="{Binding PlaylistPositionText}" />
-                        </StackPanel>
-                        <TextBlock MaxWidth="320"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,2,0,0"
-                                   FontSize="11"
-                                   Foreground="#9F9F9F"
-                                   Text="{Binding StatusText}"
-                                   TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-
-                    <StackPanel Grid.Column="2"
-                                Orientation="Horizontal"
-                                VerticalAlignment="Center">
-                        <Button Margin="0,0,2,0"
-                                Command="{Binding ToggleMuteCommand}"
-                                Style="{StaticResource PlayerIconButton}"
-                                ToolTip="음소거">
-                            <TextBlock FontFamily="Segoe UI Emoji"
-                                       FontSize="14"
-                                       Text="{Binding MuteButtonText}" />
-                        </Button>
-
-                        <Slider x:Name="VolumeSlider"
-                                Width="72"
-                                Minimum="0"
-                                Maximum="100"
-                                Value="{Binding VolumeLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                Margin="0,0,8,0"
-                                VerticalAlignment="Center"
-                                Style="{StaticResource PlayerSlider}"
-                                ToolTip="볼륨 조절" />
-
-                        <Rectangle Width="1" Height="16" Margin="4,0"
-                                   Fill="#28FFFFFF" VerticalAlignment="Center" />
-
-                        <Button Click="OnFullscreenButtonClick"
-                                Margin="2,0"
-                                Style="{StaticResource PlayerIconButton}"
-                                ToolTip="전체화면">
-                            <TextBlock x:Name="FullscreenGlyph"
-                                       Style="{StaticResource IconGlyph}"
-                                       Text="&#xE740;" />
-                        </Button>
-
-                        <Button x:Name="SettingsButton"
-                                Command="{Binding OpenSettingsCommand}"
-                                Style="{StaticResource PlayerIconButton}"
-                                ToolTip="설정">
-                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE713;" />
-                        </Button>
-                    </StackPanel>
-                </Grid>
-            </Grid>
-        </Border>
-
-        <Border Grid.Row="1"
-                Grid.Column="1"
-                Width="280"
-                Background="#CC111111"
-                BorderBrush="#1FFFFFFF"
+        <!-- ══════════════════════════════════════
+             MAIN STAGE — FilePanel (Col 1)
+             Auxiliary panel attached to VideoStage — not a full-window sidebar.
+             Collapses to zero width when closed; opens to 214px alongside the video.
+             ══════════════════════════════════════ -->
+        <Border Grid.Row="1" Grid.Column="1"
+                Width="214"
+                Background="#0E0E10"
+                BorderBrush="#1EFFFFFF"
                 BorderThickness="1,0,0,0">
             <Border.Style>
                 <Style TargetType="Border">
@@ -562,29 +359,38 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <StackPanel Margin="14,14,14,10">
-                    <TextBlock Text="Files"
-                               FontSize="16"
-                               FontWeight="SemiBold"
-                               Foreground="#F3F3F3" />
-                    <TextBlock Margin="0,6,0,0"
-                               FontSize="11"
-                               Foreground="#9D9D9D"
+                <!-- Panel header: compact, two-line -->
+                <Grid Grid.Row="0" Margin="10,8,10,6">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Files" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="#D8D8D8" VerticalAlignment="Center" />
+                        <TextBlock Margin="5,0,0,0" FontFamily="Consolas" FontSize="10"
+                                   Foreground="#424242" VerticalAlignment="Center"
+                                   Text="{Binding PlaylistCount, StringFormat=({0})}" />
+                    </StackPanel>
+                    <TextBlock Grid.Row="1" Margin="0,3,0,0" FontSize="10"
+                               Foreground="#3E3E3E"
                                Text="{Binding CurrentFolderDisplayName}"
                                TextTrimming="CharacterEllipsis" />
-                </StackPanel>
+                </Grid>
 
+                <Rectangle Grid.Row="0" Height="1" VerticalAlignment="Bottom" Fill="#12FFFFFF" />
+
+                <!-- File list -->
                 <ListBox Grid.Row="1"
-                         Margin="8,0,8,8"
+                         Margin="3,3,3,3"
                          ItemsSource="{Binding MediaFiles}"
                          SelectedItem="{Binding SelectedMediaFile, Mode=TwoWay}"
-                         Background="Transparent"
-                         BorderThickness="0"
+                         Background="Transparent" BorderThickness="0"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem">
                             <Setter Property="Padding" Value="0" />
-                            <Setter Property="Margin" Value="0,0,0,4" />
+                            <Setter Property="Margin" Value="0,1,0,0" />
                             <Setter Property="Background" Value="Transparent" />
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                             <Setter Property="Template">
@@ -592,17 +398,31 @@
                                     <ControlTemplate TargetType="ListBoxItem">
                                         <Border x:Name="ItemBorder"
                                                 Background="{TemplateBinding Background}"
-                                                CornerRadius="8"
-                                                Padding="10,8">
-                                            <ContentPresenter />
+                                                CornerRadius="4">
+                                            <Grid>
+                                                <Rectangle x:Name="AccentLine"
+                                                           Width="3" HorizontalAlignment="Left"
+                                                           VerticalAlignment="Stretch"
+                                                           Fill="#4478CC" RadiusX="1.5" RadiusY="1.5"
+                                                           Visibility="Collapsed" />
+                                                <ContentPresenter Margin="11,0,7,0" VerticalAlignment="Center" />
+                                            </Grid>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="ItemBorder" Property="Background" Value="#20FFFFFF" />
+                                                <Setter TargetName="ItemBorder" Property="Background" Value="#16FFFFFF" />
                                             </Trigger>
                                             <Trigger Property="IsSelected" Value="True">
-                                                <Setter TargetName="ItemBorder" Property="Background" Value="#2DFFFFFF" />
+                                                <Setter TargetName="ItemBorder" Property="Background" Value="#0C2238" />
+                                                <Setter TargetName="AccentLine" Property="Visibility" Value="Visible" />
                                             </Trigger>
+                                            <MultiTrigger>
+                                                <MultiTrigger.Conditions>
+                                                    <Condition Property="IsSelected" Value="True" />
+                                                    <Condition Property="IsMouseOver" Value="True" />
+                                                </MultiTrigger.Conditions>
+                                                <Setter TargetName="ItemBorder" Property="Background" Value="#102A42" />
+                                            </MultiTrigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Setter.Value>
@@ -613,13 +433,27 @@
                         <DataTemplate>
                             <Button Command="{Binding DataContext.PlayMediaFileCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                     CommandParameter="{Binding}"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Padding="0"
-                                    HorizontalContentAlignment="Stretch">
-                                <TextBlock Text="{Binding FileName}"
-                                           Foreground="#E6E6E6"
-                                           TextTrimming="CharacterEllipsis" />
+                                    HorizontalContentAlignment="Stretch"
+                                    FocusVisualStyle="{x:Null}">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <ContentPresenter />
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <TextBlock TextTrimming="CharacterEllipsis" FontSize="11" Padding="0,5,0,5">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="{Binding FileName}" />
+                                            <Setter Property="Foreground" Value="#686868" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                    <Setter Property="Foreground" Value="#D8D8D8" />
+                                                    <Setter Property="FontWeight" Value="Medium" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                             </Button>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
@@ -627,6 +461,183 @@
             </Grid>
         </Border>
 
+        <!-- ══════════════════════════════════════
+             BOTTOM BAR — fixed 80px height
+             Spans full width (both columns).
+
+             ┌──────────────────────────────────────────────────────────────────┐
+             │  SeekRow (28px)  — seek slider, full width                       │
+             ├──────────────────┬─────────────────────┬───────────────────────-┤
+             │  Transport (Auto)│  Now Playing (*)    │  Utility (Auto)         │
+             │  Prev Play Stop  │  filename / time·pos│  Vol  Panel  Full  Cfg  │
+             └──────────────────┴─────────────────────┴────────────────────────┘
+             ══════════════════════════════════════ -->
+        <Border Grid.Row="2" Grid.ColumnSpan="2"
+                Background="#80000000"
+                BorderBrush="#14FFFFFF"
+                BorderThickness="0,1,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="28" />  <!-- SeekRow -->
+                    <RowDefinition Height="*" />   <!-- ControlsRow -->
+                </Grid.RowDefinitions>
+
+                <!-- SeekRow -->
+                <Slider x:Name="SeekSlider"
+                        Grid.Row="0"
+                        Margin="12,0,12,0"
+                        VerticalAlignment="Center"
+                        Minimum="0"
+                        Maximum="{Binding DurationSeconds}"
+                        Value="{Binding ElapsedSeconds, Mode=OneWay}"
+                        IsEnabled="{Binding IsSeekAvailable}"
+                        Style="{StaticResource PlayerSlider}"
+                        ToolTipService.ShowOnDisabled="True"
+                        ToolTip="재생 위치 이동" />
+
+                <!-- ControlsRow: 3 columns aligned on same baseline -->
+                <Grid Grid.Row="1" Margin="8,0,8,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />  <!-- Col 0: transport -->
+                        <ColumnDefinition Width="*" />     <!-- Col 1: now-playing info -->
+                        <ColumnDefinition Width="Auto" />  <!-- Col 2: utility -->
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Col 0: Transport buttons -->
+                    <StackPanel Grid.Column="0"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <Button Command="{Binding OpenFileCommand}"
+                                Style="{StaticResource PlayerIconButton}" ToolTip="파일 열기">
+                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE8B7;" />
+                        </Button>
+                        <Rectangle Width="1" Height="14" Margin="6,0" Fill="#1EFFFFFF" VerticalAlignment="Center" />
+                        <Button Command="{Binding PlayPreviousCommand}"
+                                Margin="0,0,1,0"
+                                Style="{StaticResource PlayerIconButton}" ToolTip="이전 트랙">
+                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE892;" />
+                        </Button>
+                        <Button Width="38" Height="38" Margin="1,0"
+                                Command="{Binding TogglePlayPauseCommand}"
+                                Style="{StaticResource PlayerIconButton}"
+                                ToolTip="{Binding TogglePlaybackToolTip}">
+                            <TextBlock Style="{StaticResource IconGlyph}" FontSize="17"
+                                       Text="{Binding TogglePlaybackGlyph}" />
+                        </Button>
+                        <Button Margin="1,0"
+                                Command="{Binding StopCommand}"
+                                Style="{StaticResource PlayerIconButton}" ToolTip="정지">
+                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE71A;" />
+                        </Button>
+                        <Button Margin="1,0,0,0"
+                                Command="{Binding PlayNextCommand}"
+                                Style="{StaticResource PlayerIconButton}" ToolTip="다음 트랙">
+                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE893;" />
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Col 1: Now-playing info — 2 lines, flat, centered
+                         Line 1: filename  [PAUSED]
+                         Line 2: elapsed / duration  ·  index / total
+                    -->
+                    <StackPanel Grid.Column="1"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Margin="12,0">
+
+                        <!-- Line 1: filename + PAUSED badge
+                             MaxWidth increased to give center info proper width in the bar -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock FontSize="12" Foreground="#D2D2D2"
+                                       MaxWidth="400"
+                                       Text="{Binding CurrentFileDisplayName}"
+                                       TextTrimming="CharacterEllipsis"
+                                       VerticalAlignment="Center" />
+                            <Border Margin="7,0,0,0" Padding="5,1,5,2"
+                                    Background="#1EFFFFFF" CornerRadius="6"
+                                    VerticalAlignment="Center" IsHitTestVisible="False">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsPaused}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock FontSize="9" FontWeight="SemiBold"
+                                           Foreground="#A0A0A0" Text="PAUSED" />
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Line 2: time / duration  ·  position -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
+                            <TextBlock FontFamily="Consolas" FontSize="12"
+                                       Foreground="#B8B8B8"
+                                       Text="{Binding ElapsedText}"
+                                       VerticalAlignment="Center" />
+                            <TextBlock FontSize="12" Foreground="#38FFFFFF"
+                                       Margin="5,0" Text="/"
+                                       VerticalAlignment="Center" />
+                            <TextBlock FontFamily="Consolas" FontSize="12"
+                                       Foreground="#787878"
+                                       Text="{Binding DurationText}"
+                                       VerticalAlignment="Center" />
+                            <TextBlock FontSize="12" Foreground="#2CFFFFFF"
+                                       Margin="10,0,8,0" Text="&#xB7;"
+                                       VerticalAlignment="Center" />
+                            <TextBlock FontFamily="Consolas" FontSize="11"
+                                       Foreground="#8A8A8A"
+                                       Text="{Binding PlaylistPositionText}"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Col 2: Utility controls -->
+                    <StackPanel Grid.Column="2"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <Button Margin="0,0,2,0"
+                                Command="{Binding ToggleMuteCommand}"
+                                Style="{StaticResource PlayerIconButton}" ToolTip="음소거">
+                            <TextBlock FontFamily="Segoe UI Emoji" FontSize="13"
+                                       Text="{Binding MuteButtonText}" />
+                        </Button>
+                        <Slider x:Name="VolumeSlider"
+                                Width="68" Minimum="0" Maximum="100"
+                                Value="{Binding VolumeLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Margin="0,0,4,0"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource PlayerSlider}"
+                                ToolTip="볼륨 조절" />
+                        <Rectangle Width="1" Height="14" Margin="4,0" Fill="#1EFFFFFF" VerticalAlignment="Center" />
+                        <Button Command="{Binding ToggleFilePanelCommand}"
+                                Margin="2,0"
+                                Style="{StaticResource PlayerIconButton}"
+                                ToolTip="{Binding FilePanelToggleToolTip}">
+                            <TextBlock Style="{StaticResource IconGlyph}"
+                                       Text="{Binding FilePanelToggleGlyph}" />
+                        </Button>
+                        <Rectangle Width="1" Height="14" Margin="4,0" Fill="#1EFFFFFF" VerticalAlignment="Center" />
+                        <Button Click="OnFullscreenButtonClick"
+                                Margin="2,0"
+                                Style="{StaticResource PlayerIconButton}" ToolTip="전체화면">
+                            <TextBlock x:Name="FullscreenGlyph"
+                                       Style="{StaticResource IconGlyph}" Text="&#xE740;" />
+                        </Button>
+                        <Button x:Name="SettingsButton"
+                                Command="{Binding OpenSettingsCommand}"
+                                Margin="2,0,0,0"
+                                Style="{StaticResource PlayerIconButton}" ToolTip="설정">
+                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE713;" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- Settings popup -->
         <Popup IsOpen="{Binding IsSettingsOpen}"
                PlacementTarget="{Binding ElementName=SettingsButton}"
                Placement="Top"
@@ -634,57 +645,36 @@
                PopupAnimation="Fade"
                StaysOpen="False"
                DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
-            <Border Width="420"
-                    MaxWidth="420"
-                    Padding="20"
-                    Background="#161616"
-                    BorderBrush="#26FFFFFF"
-                    BorderThickness="1"
-                    CornerRadius="14"
-                    SnapsToDevicePixels="True">
+            <Border Width="420" MaxWidth="420" Padding="20"
+                    Background="#161616" BorderBrush="#22FFFFFF"
+                    BorderThickness="1" CornerRadius="12" SnapsToDevicePixels="True">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-
-                    <Grid Grid.Row="0" Margin="0,0,0,18">
+                    <Grid Grid.Row="0" Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-
-                        <TextBlock Text="Settings"
-                                   FontSize="22"
-                                   FontWeight="SemiBold"
-                                   Foreground="#F4F4F4"
-                                   VerticalAlignment="Center" />
-
-                        <Button Grid.Column="1"
-                                Width="32"
-                                Height="32"
+                        <TextBlock Text="Settings" FontSize="20" FontWeight="SemiBold"
+                                   Foreground="#F0F0F0" VerticalAlignment="Center" />
+                        <Button Grid.Column="1" Width="30" Height="30"
                                 Command="{Binding CloseSettingsCommand}"
-                                Style="{StaticResource PlayerIconButton}"
-                                ToolTip="닫기">
+                                Style="{StaticResource PlayerIconButton}" ToolTip="닫기">
                             <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE8BB;" />
                         </Button>
                     </Grid>
-
                     <StackPanel Grid.Row="1">
-                        <Border Padding="14"
-                                Background="#0F0F0F"
-                                BorderBrush="#1FFFFFFF"
-                                BorderThickness="1"
-                                CornerRadius="10">
+                        <Border Padding="14" Background="#0F0F0F"
+                                BorderBrush="#1AFFFFFF" BorderThickness="1" CornerRadius="8">
                             <StackPanel>
                                 <TextBlock Text="Player settings will appear here."
-                                           FontSize="14"
-                                           Foreground="#E8E8E8" />
+                                           FontSize="13" Foreground="#D8D8D8" />
                                 <TextBlock Margin="0,8,0,0"
                                            Text="This panel is wired so we can add playback, window, and subtitle options next."
-                                           TextWrapping="Wrap"
-                                           FontSize="12"
-                                           Foreground="#AEAEAE" />
+                                           TextWrapping="Wrap" FontSize="12" Foreground="#909090" />
                             </StackPanel>
                         </Border>
                     </StackPanel>
