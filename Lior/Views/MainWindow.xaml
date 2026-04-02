@@ -11,6 +11,7 @@
         Height="660"
         MinWidth="640"
         MinHeight="420"
+        StateChanged="OnWindowStateChanged"
         WindowStyle="None"
         ResizeMode="CanResize"
         Background="#0E0E0E"
@@ -25,6 +26,7 @@
     </shell:WindowChrome.WindowChrome>
 
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
         <!-- ─── Player icon button ───────────────────────── -->
         <Style x:Key="PlayerIconButton" TargetType="Button">
@@ -191,7 +193,8 @@
         </Grid.RowDefinitions>
 
         <!-- ═══════════════ TITLE BAR ═══════════════════ -->
-        <Border Grid.Row="0"
+        <Border x:Name="TitleBarRoot"
+                Grid.Row="0"
                 Background="#55000000"
                 BorderBrush="#1FFFFFFF"
                 BorderThickness="0,0,0,1">
@@ -404,11 +407,10 @@
                         <Rectangle Width="1" Height="16" Margin="6,0"
                                    Fill="#28FFFFFF" VerticalAlignment="Center" />
 
-                        <Button IsEnabled="False"
+                        <Button Command="{Binding PlayPreviousCommand}"
                                 Margin="0,0,2,0"
                                 Style="{StaticResource PlayerIconButton}"
-                                ToolTipService.ShowOnDisabled="True"
-                                ToolTip="이전 트랙 — 준비 중">
+                                ToolTip="이전 트랙">
                             <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE892;" />
                         </Button>
 
@@ -429,30 +431,53 @@
                             <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE71A;" />
                         </Button>
 
-                        <Button IsEnabled="False"
+                        <Button Command="{Binding PlayNextCommand}"
                                 Style="{StaticResource PlayerIconButton}"
-                                ToolTipService.ShowOnDisabled="True"
-                                ToolTip="다음 트랙 — 준비 중">
+                                ToolTip="다음 트랙">
                             <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE893;" />
                         </Button>
                     </StackPanel>
 
                     <StackPanel Grid.Column="1"
-                                Orientation="Horizontal"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center">
-                        <TextBlock FontFamily="Consolas"
+                        <TextBlock MaxWidth="320"
+                                   HorizontalAlignment="Center"
                                    FontSize="12"
-                                   Foreground="#E2E2E2"
-                                   Text="{Binding ElapsedText}" />
-                        <TextBlock FontSize="12"
-                                   Foreground="#88FFFFFF"
-                                   Margin="5,0"
-                                   Text="/" />
-                        <TextBlock FontFamily="Consolas"
-                                   FontSize="12"
-                                   Foreground="#B7B7B7"
-                                   Text="{Binding DurationText}" />
+                                   Foreground="#E8E8E8"
+                                   Text="{Binding CurrentFileDisplayName}"
+                                   TextTrimming="CharacterEllipsis" />
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    Margin="0,4,0,0">
+                            <TextBlock FontFamily="Consolas"
+                                       FontSize="12"
+                                       Foreground="#E2E2E2"
+                                       Text="{Binding ElapsedText}" />
+                            <TextBlock FontSize="12"
+                                       Foreground="#88FFFFFF"
+                                       Margin="5,0"
+                                       Text="/" />
+                            <TextBlock FontFamily="Consolas"
+                                       FontSize="12"
+                                       Foreground="#B7B7B7"
+                                       Text="{Binding DurationText}" />
+                            <TextBlock FontSize="11"
+                                       Foreground="#66FFFFFF"
+                                       Margin="10,0,6,0"
+                                       Text="|" />
+                            <TextBlock FontFamily="Consolas"
+                                       FontSize="12"
+                                       Foreground="#CFCFCF"
+                                       Text="{Binding PlaylistPositionText}" />
+                        </StackPanel>
+                        <TextBlock MaxWidth="320"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,2,0,0"
+                                   FontSize="11"
+                                   Foreground="#9F9F9F"
+                                   Text="{Binding StatusText}"
+                                   TextTrimming="CharacterEllipsis" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="2"
@@ -480,23 +505,89 @@
                         <Rectangle Width="1" Height="16" Margin="4,0"
                                    Fill="#28FFFFFF" VerticalAlignment="Center" />
 
-                        <Button IsEnabled="False"
+                        <Button Click="OnFullscreenButtonClick"
                                 Margin="2,0"
                                 Style="{StaticResource PlayerIconButton}"
-                                ToolTipService.ShowOnDisabled="True"
-                                ToolTip="전체화면 — 준비 중">
-                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE740;" />
+                                ToolTip="전체화면">
+                            <TextBlock x:Name="FullscreenGlyph"
+                                       Style="{StaticResource IconGlyph}"
+                                       Text="&#xE740;" />
                         </Button>
 
-                        <Button IsEnabled="False"
+                        <Button x:Name="SettingsButton"
+                                Command="{Binding OpenSettingsCommand}"
                                 Style="{StaticResource PlayerIconButton}"
-                                ToolTipService.ShowOnDisabled="True"
-                                ToolTip="설정 — 준비 중">
+                                ToolTip="설정">
                             <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE713;" />
                         </Button>
                     </StackPanel>
                 </Grid>
             </Grid>
         </Border>
+
+        <Popup IsOpen="{Binding IsSettingsOpen}"
+               PlacementTarget="{Binding ElementName=SettingsButton}"
+               Placement="Top"
+               AllowsTransparency="True"
+               PopupAnimation="Fade"
+               StaysOpen="False"
+               DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+            <Border Width="420"
+                    MaxWidth="420"
+                    Padding="20"
+                    Background="#161616"
+                    BorderBrush="#26FFFFFF"
+                    BorderThickness="1"
+                    CornerRadius="14"
+                    SnapsToDevicePixels="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="Settings"
+                                   FontSize="22"
+                                   FontWeight="SemiBold"
+                                   Foreground="#F4F4F4"
+                                   VerticalAlignment="Center" />
+
+                        <Button Grid.Column="1"
+                                Width="32"
+                                Height="32"
+                                Command="{Binding CloseSettingsCommand}"
+                                Style="{StaticResource PlayerIconButton}"
+                                ToolTip="닫기">
+                            <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE8BB;" />
+                        </Button>
+                    </Grid>
+
+                    <StackPanel Grid.Row="1">
+                        <Border Padding="14"
+                                Background="#0F0F0F"
+                                BorderBrush="#1FFFFFFF"
+                                BorderThickness="1"
+                                CornerRadius="10">
+                            <StackPanel>
+                                <TextBlock Text="Player settings will appear here."
+                                           FontSize="14"
+                                           Foreground="#E8E8E8" />
+                                <TextBlock Margin="0,8,0,0"
+                                           Text="This panel is wired so we can add playback, window, and subtitle options next."
+                                           TextWrapping="Wrap"
+                                           FontSize="12"
+                                           Foreground="#AEAEAE" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Popup>
     </Grid>
 </Window>

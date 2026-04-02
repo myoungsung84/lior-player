@@ -13,6 +13,7 @@ namespace Lior.Services;
 public sealed class MpvPlayerService : IPlayerService, IDisposable
 {
     private const int MpvFormatDouble = 5;
+    private const int MpvFormatFlag = 3;
     private readonly ILogger<MpvPlayerService> _logger;
     private nint _handle;
     private nint _renderTarget;
@@ -20,6 +21,9 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
     private bool _initialized;
     private double _volume;
     private bool _isMuted;
+    private bool _playbackEndedRaised;
+
+    public event EventHandler? PlaybackEnded;
 
     public MpvPlayerService(
         ILogger<MpvPlayerService> logger,
@@ -116,6 +120,7 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
 
         CurrentMediaPath = mediaPath;
         State = PlaybackState.Loaded;
+        _playbackEndedRaised = false;
         _logger.LogInformation("mpv loaded media: {MediaPath}", mediaPath);
         return true;
     }
@@ -151,6 +156,7 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
         }
 
         State = PlaybackState.Playing;
+        _playbackEndedRaised = false;
         return true;
     }
 
@@ -201,6 +207,7 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
         }
 
         State = PlaybackState.Stopped;
+        _playbackEndedRaised = false;
         return true;
     }
 
@@ -213,6 +220,7 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
             return 0;
         }
 
+        SyncPlaybackLifecycle();
         return Math.Max(0, GetDoubleProperty("time-pos"));
     }
 
@@ -225,6 +233,7 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
             return 0;
         }
 
+        SyncPlaybackLifecycle();
         return Math.Max(0, GetDoubleProperty("duration"));
     }
 
@@ -443,11 +452,35 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
     private void ResetPlaybackState(bool clearMediaPath)
     {
         State = PlaybackState.None;
+        _playbackEndedRaised = false;
 
         if (clearMediaPath)
         {
             CurrentMediaPath = null;
         }
+    }
+
+    private void SyncPlaybackLifecycle()
+    {
+        if (string.IsNullOrWhiteSpace(CurrentMediaPath) || State is PlaybackState.None)
+        {
+            return;
+        }
+
+        if (!GetFlagProperty("eof-reached"))
+        {
+            return;
+        }
+
+        State = PlaybackState.Stopped;
+
+        if (_playbackEndedRaised)
+        {
+            return;
+        }
+
+        _playbackEndedRaised = true;
+        PlaybackEnded?.Invoke(this, EventArgs.Empty);
     }
 
     private double GetDoubleProperty(string name)
@@ -519,7 +552,40 @@ public sealed class MpvPlayerService : IPlayerService, IDisposable
             namePtr = Marshal.StringToCoTaskMemUTF8(name);
             valuePtr = Marshal.AllocHGlobal(sizeof(int));
             Marshal.WriteInt32(valuePtr, value ? 1 : 0);
-            return MpvNative.mpv_set_property(_handle, namePtr, 3, valuePtr);
+            return MpvNative.mpv_set_property(_handle, namePtr, MpvFormatFlag, valuePtr);
+        }
+        finally
+        {
+            if (namePtr != nint.Zero)
+            {
+                Marshal.FreeCoTaskMem(namePtr);
+            }
+
+            if (valuePtr != nint.Zero)
+            {
+                Marshal.FreeHGlobal(valuePtr);
+            }
+        }
+    }
+
+    private bool GetFlagProperty(string name)
+    {
+        var namePtr = nint.Zero;
+        var valuePtr = nint.Zero;
+
+        try
+        {
+            namePtr = Marshal.StringToCoTaskMemUTF8(name);
+            valuePtr = Marshal.AllocHGlobal(sizeof(int));
+            Marshal.WriteInt32(valuePtr, 0);
+
+            var result = MpvNative.mpv_get_property(_handle, namePtr, MpvFormatFlag, valuePtr);
+            if (result < 0)
+            {
+                return false;
+            }
+
+            return Marshal.ReadInt32(valuePtr) != 0;
         }
         finally
         {

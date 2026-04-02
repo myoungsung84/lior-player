@@ -4,6 +4,8 @@ namespace Lior.Services.Interfaces;
 
 public interface IPlayerService
 {
+    event EventHandler? PlaybackEnded;
+
     PlaybackState State { get; }
 
     string? CurrentMediaPath { get; }
