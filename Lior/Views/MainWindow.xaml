@@ -191,10 +191,15 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
 
         <!-- ═══════════════ TITLE BAR ═══════════════════ -->
         <Border x:Name="TitleBarRoot"
                 Grid.Row="0"
+                Grid.ColumnSpan="2"
                 Background="#55000000"
                 BorderBrush="#1FFFFFFF"
                 BorderThickness="0,0,0,1">
@@ -325,6 +330,7 @@
 
         <!-- ═══════════════ VIDEO AREA ═══════════════════ -->
         <Grid Grid.Row="1"
+              Grid.Column="0"
               Background="#0A0A0A">
 
             <!-- mpv render surface -->
@@ -367,6 +373,7 @@
         </Grid>
 
         <Border Grid.Row="2"
+                Grid.ColumnSpan="2"
                 Background="#70000000"
                 BorderBrush="#1FFFFFFF"
                 BorderThickness="0,1,0,0"
@@ -402,6 +409,14 @@
                                 Style="{StaticResource PlayerIconButton}"
                                 ToolTip="파일 열기">
                             <TextBlock Style="{StaticResource IconGlyph}" Text="&#xE8B7;" />
+                        </Button>
+
+                        <Button Command="{Binding ToggleFilePanelCommand}"
+                                Margin="2,0,0,0"
+                                Style="{StaticResource PlayerIconButton}"
+                                ToolTip="{Binding FilePanelToggleToolTip}">
+                            <TextBlock Style="{StaticResource IconGlyph}"
+                                       Text="{Binding FilePanelToggleGlyph}" />
                         </Button>
 
                         <Rectangle Width="1" Height="16" Margin="6,0"
@@ -522,6 +537,93 @@
                         </Button>
                     </StackPanel>
                 </Grid>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1"
+                Grid.Column="1"
+                Width="280"
+                Background="#CC111111"
+                BorderBrush="#1FFFFFFF"
+                BorderThickness="1,0,0,0">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsFilePanelOpen}" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Margin="14,14,14,10">
+                    <TextBlock Text="Files"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="#F3F3F3" />
+                    <TextBlock Margin="0,6,0,0"
+                               FontSize="11"
+                               Foreground="#9D9D9D"
+                               Text="{Binding CurrentFolderDisplayName}"
+                               TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+
+                <ListBox Grid.Row="1"
+                         Margin="8,0,8,8"
+                         ItemsSource="{Binding MediaFiles}"
+                         SelectedItem="{Binding SelectedMediaFile, Mode=TwoWay}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0,0,0,4" />
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="ItemBorder"
+                                                Background="{TemplateBinding Background}"
+                                                CornerRadius="8"
+                                                Padding="10,8">
+                                            <ContentPresenter />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="ItemBorder" Property="Background" Value="#20FFFFFF" />
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="ItemBorder" Property="Background" Value="#2DFFFFFF" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding DataContext.PlayMediaFileCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                    CommandParameter="{Binding}"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Padding="0"
+                                    HorizontalContentAlignment="Stretch">
+                                <TextBlock Text="{Binding FileName}"
+                                           Foreground="#E6E6E6"
+                                           TextTrimming="CharacterEllipsis" />
+                            </Button>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </Grid>
         </Border>
 

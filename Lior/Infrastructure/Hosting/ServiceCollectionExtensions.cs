@@ -19,6 +19,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<MpvPlayerService>();
         services.AddSingleton<IPlayerService>(serviceProvider => serviceProvider.GetRequiredService<MpvPlayerService>());
         services.AddSingleton<IFileDialogService, FileDialogService>();
+        services.AddSingleton<IMediaFileCatalogService, MediaFileCatalogService>();
 
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<MainWindow>();

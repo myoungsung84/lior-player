@@ -3,8 +3,8 @@ using CommunityToolkit.Mvvm.Input;
 using Lior.Models;
 using Lior.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows.Threading;
 
 namespace Lior.ViewModels;
@@ -12,6 +12,7 @@ namespace Lior.ViewModels;
 public partial class MainWindowViewModel : ObservableObject
 {
     private readonly IFileDialogService _fileDialogService;
+    private readonly IMediaFileCatalogService _mediaFileCatalogService;
     private readonly IPlayerService _playerService;
     private readonly ILogger<MainWindowViewModel> _logger;
     private readonly DispatcherTimer _playbackTimer;
@@ -20,7 +21,6 @@ public partial class MainWindowViewModel : ObservableObject
     private DateTime _seekSyncSuppressedUntilUtc = DateTime.MinValue;
     private double? _pendingSeekPositionSeconds;
     private double _previousVolumeBeforeMute = 70;
-    private readonly List<string> _playlist = [];
     private bool _isHandlingPlaybackEnded;
 
     [ObservableProperty]
@@ -59,11 +59,22 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private int currentPlaylistIndex = -1;
 
+    [ObservableProperty]
+    private string currentFolderPath = string.Empty;
+
+    [ObservableProperty]
+    private bool isFilePanelOpen;
+
+    [ObservableProperty]
+    private MediaFileItem? selectedMediaFile;
+
+    public ObservableCollection<MediaFileItem> MediaFiles { get; } = [];
+
     public bool HasSelectedMedia => !string.IsNullOrWhiteSpace(_playerService.CurrentMediaPath);
 
-    public bool HasPlaylist => _playlist.Count > 0;
+    public bool HasPlaylist => MediaFiles.Count > 0;
 
-    public int PlaylistCount => _playlist.Count;
+    public int PlaylistCount => MediaFiles.Count;
 
     public bool CanPlay => HasSelectedMedia && PlaybackState is not PlaybackState.Playing;
 
@@ -96,6 +107,12 @@ public partial class MainWindowViewModel : ObservableObject
             ? $"{CurrentPlaylistIndex + 1} / {PlaylistCount}"
             : "- / -";
 
+    public string CurrentFolderDisplayName => string.IsNullOrWhiteSpace(CurrentFolderPath) ? "No folder loaded" : CurrentFolderPath;
+
+    public string FilePanelToggleGlyph => IsFilePanelOpen ? "\uE70D" : "\uE700";
+
+    public string FilePanelToggleToolTip => IsFilePanelOpen ? "파일 패널 닫기" : "파일 패널 열기";
+
     public string MediaTitle =>
         string.IsNullOrWhiteSpace(_playerService.CurrentMediaPath)
             ? string.Empty
@@ -103,10 +120,12 @@ public partial class MainWindowViewModel : ObservableObject
 
     public MainWindowViewModel(
         IFileDialogService fileDialogService,
+        IMediaFileCatalogService mediaFileCatalogService,
         IPlayerService playerService,
         ILogger<MainWindowViewModel> logger)
     {
         _fileDialogService = fileDialogService;
+        _mediaFileCatalogService = mediaFileCatalogService;
         _playerService = playerService;
         _logger = logger;
         _playbackTimer = new DispatcherTimer
@@ -128,29 +147,54 @@ public partial class MainWindowViewModel : ObservableObject
     {
         try
         {
-            var selectedPaths = _fileDialogService.OpenMediaFiles();
-            if (selectedPaths.Count == 0)
+            var selectedPath = _fileDialogService.OpenMediaFile();
+            if (string.IsNullOrWhiteSpace(selectedPath))
             {
                 StatusText = "File selection canceled";
                 return;
             }
 
-            _playlist.Clear();
-            _playlist.AddRange(selectedPaths.Where(path => !string.IsNullOrWhiteSpace(path)));
+            var mediaFiles = _mediaFileCatalogService.GetMediaFilesInFolder(selectedPath);
+            if (mediaFiles.Count == 0)
+            {
+                SyncFromPlayer("No playable files found in folder");
+                return;
+            }
+
+            MediaFiles.Clear();
+            foreach (var mediaFile in mediaFiles)
+            {
+                MediaFiles.Add(new MediaFileItem
+                {
+                    FilePath = mediaFile,
+                    FileName = Path.GetFileName(mediaFile)
+                });
+            }
+
+            CurrentFolderPath = System.IO.Path.GetDirectoryName(selectedPath) ?? string.Empty;
             OnPropertyChanged(nameof(PlaylistCount));
             OnPropertyChanged(nameof(PlaylistPositionText));
             OnPropertyChanged(nameof(HasPlaylist));
-            CurrentPlaylistIndex = 0;
+            OnPropertyChanged(nameof(CurrentFolderDisplayName));
 
-            if (!TryPlayPlaylistIndex(CurrentPlaylistIndex, $"Playing 1 of {PlaylistCount}"))
+            CurrentPlaylistIndex = MediaFiles
+                .Select((mediaFile, index) => new { mediaFile.FilePath, Index = index })
+                .FirstOrDefault(item => string.Equals(item.FilePath, selectedPath, StringComparison.OrdinalIgnoreCase))
+                ?.Index ?? -1;
+            if (CurrentPlaylistIndex < 0)
+            {
+                CurrentPlaylistIndex = 0;
+            }
+
+            if (!TryPlayPlaylistIndex(CurrentPlaylistIndex, $"Playing {CurrentPlaylistIndex + 1} of {PlaylistCount}"))
             {
                 return;
             }
 
             _logger.LogInformation(
-                "Media playlist selected with {Count} items. First item: {MediaPath}",
+                "Folder media list loaded with {Count} items. Current item: {MediaPath}",
                 PlaylistCount,
-                _playlist[CurrentPlaylistIndex]);
+                MediaFiles[CurrentPlaylistIndex].FilePath);
         }
         catch (Exception exception)
         {
@@ -169,6 +213,29 @@ public partial class MainWindowViewModel : ObservableObject
     private void CloseSettings()
     {
         IsSettingsOpen = false;
+    }
+
+    [RelayCommand]
+    private void ToggleFilePanel()
+    {
+        IsFilePanelOpen = !IsFilePanelOpen;
+    }
+
+    [RelayCommand]
+    private void PlayMediaFile(MediaFileItem? mediaFile)
+    {
+        if (mediaFile is null)
+        {
+            return;
+        }
+
+        var targetIndex = MediaFiles.IndexOf(mediaFile);
+        if (targetIndex < 0)
+        {
+            return;
+        }
+
+        TryPlayPlaylistIndex(targetIndex, $"Playing {targetIndex + 1} of {PlaylistCount}");
     }
 
     [RelayCommand(CanExecute = nameof(CanPlay))]
@@ -301,6 +368,12 @@ public partial class MainWindowViewModel : ObservableObject
         RefreshCommandStates();
     }
 
+    partial void OnIsFilePanelOpenChanged(bool value)
+    {
+        OnPropertyChanged(nameof(FilePanelToggleGlyph));
+        OnPropertyChanged(nameof(FilePanelToggleToolTip));
+    }
+
     partial void OnPlaybackStateChanged(PlaybackState value)
     {
         OnPropertyChanged(nameof(CanPlay));
@@ -378,6 +451,7 @@ public partial class MainWindowViewModel : ObservableObject
     private void RefreshCommandStates()
     {
         TogglePlayPauseCommand.NotifyCanExecuteChanged();
+        ToggleFilePanelCommand.NotifyCanExecuteChanged();
         PlayCommand.NotifyCanExecuteChanged();
         PauseCommand.NotifyCanExecuteChanged();
         StopCommand.NotifyCanExecuteChanged();
@@ -573,11 +647,11 @@ public partial class MainWindowViewModel : ObservableObject
     {
         if (targetIndex < 0 || targetIndex >= PlaylistCount)
         {
-            SyncFromPlayer("Playlist index out of range");
+            SyncFromPlayer("File index out of range");
             return false;
         }
 
-        var selectedPath = _playlist[targetIndex];
+        var selectedPath = MediaFiles[targetIndex].FilePath;
         if (!_playerService.Load(selectedPath))
         {
             SyncFromPlayer("Failed to load media");
@@ -591,6 +665,7 @@ public partial class MainWindowViewModel : ObservableObject
         }
 
         CurrentPlaylistIndex = targetIndex;
+        SelectedMediaFile = MediaFiles[targetIndex];
         SyncFromPlayer(statusText);
         return true;
     }
