@@ -4,9 +4,15 @@ namespace Lior.Services.Interfaces;
 
 public interface IPlayerService
 {
+    event EventHandler? PlaybackEnded;
+
     PlaybackState State { get; }
 
     string? CurrentMediaPath { get; }
+
+    double Volume { get; }
+
+    bool IsMuted { get; }
 
     void SetRenderTarget(nint windowHandle);
 
@@ -19,4 +25,14 @@ public interface IPlayerService
     bool Pause();
 
     bool Stop();
+
+    double GetPositionSeconds();
+
+    double GetDurationSeconds();
+
+    bool Seek(double positionSeconds);
+
+    bool SetVolume(double volume);
+
+    bool SetMuted(bool isMuted);
 }

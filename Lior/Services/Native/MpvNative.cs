@@ -20,4 +20,10 @@ internal static class MpvNative
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     internal static extern int mpv_command(nint handle, nint args);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int mpv_get_property(nint handle, nint name, int format, nint data);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int mpv_set_property(nint handle, nint name, int format, nint data);
 }
